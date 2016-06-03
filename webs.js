@@ -1,6 +1,11 @@
 
 var socket = io();
 
+$("form").submit(function(e) {
+    e.preventDefault();
+    doConn();
+});
+
 socket.on('chat message', function(player){
 	console.log(player.msg);
 	$('#messages').append($('<li>').text(player.name + ": " + player.msg));
