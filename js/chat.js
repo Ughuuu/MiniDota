@@ -1,38 +1,14 @@
 var socket = io();
 
-$("form").submit(function(e) {
-    e.preventDefault();
-    doConn();
-});
-
 socket.on('chat message', function(player){
-	$('#messages').append($('<li>').text(player.name + ": " + player.msg));
+	console.log(player.msg);
 });
 
 socket.on('chat event',function(data){
-	$('#player_list').empty();
-	for (var i in data) {
-		var name = data[i].name;
-		$('#player_list').append($('<li>').text(name));
-	}
+	//empty player list and update it
 });
 
-function doConn(){
-    if ($('#button').text() == 'Connect!') {
-        var nameCurrent = $('#send').val();
-        socket.emit('makePlayer',{name:nameCurrent});
-        $('#send').val('');
-        $('#hellomsg').text(nameCurrent);
-        $('#button').text('Send');
-    } else {
-    	socket.emit('chat message', $('#send').val());
-		$('#send').val('');
-    }
-    
-}
-
-
-var app = angular.module('MainChat', ['ngAnimate', 'ngAria', 'ngMaterial', 'ngMessages']);
+var app = angular.module('MainScreen', ['ngAnimate', 'ngAria', 'ngMaterial', 'ngMessages']);
 
 app.config(function($mdThemingProvider) {
     $mdThemingProvider.theme('default')
@@ -40,8 +16,27 @@ app.config(function($mdThemingProvider) {
         .accentPalette('amber');
 });
 
-
-app.controller('AppCtrl', ['$scope', function($scope) {
+app.controller('MainChat', ['$scope', function($scope) {
 	$scope.player_list = [];
 	$scope.message_list = [];
+
+    $scope.doConnection = function(){
+        if (angular.element('#button').text() == "Connect!") {
+            var nameCurrent = angular.element('#send').text();
+            socket.emit('makePlayer',{name:nameCurrent});
+            angular.element('#send').val('');
+            angular.element('#button').text("Send");
+        } else {
+            socket.emit('chat message', angular.element('#send').val());
+            angular.element('#send').val('');
+        }  
+    };
 }]);
+
+angular.module('buttonsDemo1', ['ngMaterial'])
+.controller('AppCtrl', function($scope) {
+  $scope.title1 = 'Button';
+  $scope.title4 = 'Warn';
+  $scope.isDisabled = true;
+  $scope.googleUrl = 'http://google.com';
+});
