@@ -7,8 +7,15 @@ $("form").submit(function(e) {
 });
 
 socket.on('chat message', function(player){
-	console.log(player.msg);
 	$('#messages').append($('<li>').text(player.name + ": " + player.msg));
+});
+
+socket.on('chat event',function(data){
+	$('#player_list').empty();
+	for (var i in data) {
+		var name = data[i].name;
+		$('#player_list').append($('<li>').text(name));
+	}
 });
 
 function doConn(){

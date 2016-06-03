@@ -33,7 +33,6 @@ io.on('connection', function(socket){
 		player.name = PLAYER_LIST[socket.id].name;
 		player.msg = msg;
 	  	io.emit('chat message', player);
-
 	});
 
 	socket.on('disconnect',function(){
@@ -55,7 +54,10 @@ function connectNewPlayers(){
 	    var player = Player(id, name);
 	    PLAYER_LIST[id] = player;
 	}
-	NEW_PLAYER_LIST = [];
+	if (NEW_PLAYER_LIST.length) {
+		sendData(computeData());
+		NEW_PLAYER_LIST = [];
+	}
 }
 
 function removeDisconnected(){	
@@ -80,10 +82,7 @@ function computeData(){
 
         	//send relevant data here
 
-            x:200,
-            y:300,
-            ang:3,
-
+            id: player.id,
             name:player.name
         });    
     }
@@ -93,7 +92,7 @@ function computeData(){
 function sendData(data){	
     for(var i in SOCKET_LIST){
         var socket = SOCKET_LIST[i];
-        socket.emit('gameEvent', data);
+        socket.emit('chat event', data);
     }
 }
 
@@ -102,15 +101,16 @@ function updatePlayers(){
 
 	removeDisconnected();
 
-	var gameData = computeData();
+	//var gameData = computeData();
 
-	sendData(gameData);
+	//sendData(gameData);
 }
 
 setInterval(updatePlayers, timeStep);
 
-var Player = function(id, name){
+var Player = function(id, name, room){
     var self = {
+    	room: room,
     	name:name,
         id:id,
     }
