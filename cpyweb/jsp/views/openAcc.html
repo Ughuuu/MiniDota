@@ -1,0 +1,23 @@
+<form ng-cloak name="projectForm" layout="column" method="POST" id="projectForm" ng-submit="register()">
+    <input type="hidden" name="{{csrfParameter}}" value="{{csrfToken}}" />
+    <input value="{{project.id}}" name="id" type="hidden"/>
+    <input value="{{project.type}}" name="acc_type" type="hidden">
+    <md-input-container class="md-block" flex>
+    <label>Account Type</label>
+    <md-select ng-model="project.type" required>
+    <md-option ng-repeat="type in types" ng-value="type" required>
+    {{type}}
+    </md-option>
+    </md-select>
+    </md-input-container>
+    <md-button type="submit" class="md-raised md-accent" flex>
+    Open Account
+    </md-button>
+</form>
+<div layout="row">
+        <md-button type="submit" class="md-raised md-primary" flex  ui-sref='account({id: project.id})' flex>
+            Go Back
+        </md-button>
+        </div>
+<h3 ng-bind="errormsg" id="errormsg">
+</h3>

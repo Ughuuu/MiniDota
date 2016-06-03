@@ -5,7 +5,7 @@ var io = require('socket.io')(http);
 app.use(express.static(__dirname + '/'));
 
 app.get('/', function(req, res){
-	res.sendFile(__dirname + '/pages/index.html');
+	res.sendFile(__dirname + '/html/index.html');
 });
 
 var SOCKET_LIST = {};
@@ -117,6 +117,6 @@ var Player = function(id, name, room){
     return self;
 }
 
-http.listen(3000, function(){
-  console.log('listening on *:3000');
+http.listen(80, function(){
+  console.log('listening on *:80');
 });

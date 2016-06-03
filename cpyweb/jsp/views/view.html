@@ -1,0 +1,53 @@
+<!-- VIEW FORM -->
+
+<md-list flex>
+
+  <md-list-item class="secondary-button-padding" ng-click="onCheckClick($index)" ng-repeat="item in users" layout="row">
+      <p class='admOnly'>{{item.username}}</p>
+      <p>{{item.name}}</p>
+      <p>{{item.surname}}</p>
+      <p>{{item.email}}</p>
+      <p>{{item.address}}</p>
+      <p>{{item.city}}</p>
+      <p>{{item.state}}</p>
+      <md-checkbox class="md-secondary" ng-model="item.check" ng-click="onSecondClick($index)" ></md-checkbox>
+  </md-list-item>
+</md-list>
+<div layout="row">
+    <md-button type="submit" flex ng-disabled="start==0" ng-click="goBack()">
+        Previous page
+    </md-button>
+    <md-button type="submit" flex ng-disabled="users.length<maxSel" ng-click="goNext()">
+        Next page
+    </md-button>
+<md-input-container flex >
+        <label>Per Page</label>
+    <md-select ng-model="maxSel" md-on-close="reset()">
+          <md-option ng-repeat="bound in bounds" value="{{bound}}" >
+            {{bound}}
+          </md-option>
+        </md-select>
+        </md-input-container>
+    </div>
+<div layout="row">
+    <md-button type="submit" flex ng-disabled="selected!=1" ui-sref='update({id: users[curindex].id})'>
+        Edit User
+    </md-button>
+    <md-button type="submit" flex ng-disabled="selected!=1" ui-sref='account({id: users[curindex].id})' class='usrOnly'>
+        Check Accounts
+    </md-button>
+    <md-button type="submit" flex ng-disabled="selected!=1" ui-sref='report({username: users[curindex].username})'class='admOnly'>
+        User Report
+    </md-button>
+    <md-button type="submit" flex ng-disabled="selected!=1" ui-sref='history({id: users[curindex].id})'class='usrOnly'>
+        User History
+    </md-button>
+    <form name="removeForm" layout="column" method="POST" id="removeForm" ng-submit="doDelete()" flex>
+        <input type="hidden" name="{{csrfParameter}}" value="{{csrfToken}}" />
+      <input type="hidden" name="id" id="id" value="{{id}}">
+      <md-button type="submit" flex ng-disabled="selected==0">
+          Remove Users
+      </md-button>
+    </form>
+    </div>
+    <h3 ng-bind="errormsg">

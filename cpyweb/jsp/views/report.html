@@ -1,0 +1,36 @@
+<!-- VIEW FORM -->
+
+
+<md-list flex>
+
+  <md-list-item class="secondary-button-padding" ng-click="onCheckClick($index)" ng-repeat="item in report" layout="row">
+      <p flex>{{item.user}}</p>
+      <p flex>{{item.operation_type}}</p>
+      <p flex>{{item.client}}</p>
+      <p flex>{{item.date}}</p>
+  </md-list-item>
+</md-list>
+<div layout="row">
+    <md-button type="submit" flex ng-disabled="start==0" ng-click="goBack()">
+        Previous page
+    </md-button>
+    <md-button type="submit" flex ng-disabled="users.length<maxSel" ng-click="goNext()">
+        Next page
+    </md-button>
+<md-input-container flex >
+        <label>Per Page</label>
+    <md-select ng-model="maxSel" md-on-close="reset()">
+          <md-option ng-repeat="bound in bounds" value="{{bound}}" >
+            {{bound}}
+          </md-option>
+        </md-select>
+        </md-input-container>
+    </div>
+<div layout="row">
+    </div>
+<div layout="row">
+        <md-button type="submit" class="md-raised md-primary" flex ui-sref='view' flex>
+            Go Back
+        </md-button>
+        </div>
+    <h3 ng-bind="errormsg">

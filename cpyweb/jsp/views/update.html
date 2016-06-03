@@ -1,0 +1,83 @@
+<!-- EDIT FORM -->
+<div class="outerForm">
+    <form name="projectForm" layout="column" method="POST" id="projectForm" ng-submit="edit()">
+        <input type="hidden" name="{{csrfParameter}}" value="{{csrfToken}}" />
+        <input type="hidden" name="username" id="username" value="{{username}}" class="admOnly"/>
+        <input type="hidden" name="id" id="id" value="{{id}}" class="usrOnly"/>
+        <md-input-container class="md-block admOnly">
+            <label>Client Password</label>
+            <input id="password" required type="password" name="password" ng-model="project.password" minlength="8" maxlength="25" ng-pattern="/^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/" />
+            <div ng-messages="projectForm.password.$error" role="alert">
+                <div ng-message-exp="['required', 'minlength', 'maxlength', 'pattern']">
+                    Your password must have minimum 8 characters, at least 1 Uppercase Alphabet, 1 Lowercase Alphabet and 1 Number.
+                </div>
+            </div>
+        </md-input-container>
+        <md-input-container class="md-block">
+            <label>Client Email</label>
+            <input required type="email" name="email" ng-model="project.email" minlength="4" maxlength="50" ng-pattern="/^.+@.+\..+$/" />
+            <div ng-messages="projectForm.email.$error" role="alert">
+                <div ng-message-exp="['required', 'minlength', 'maxlength', 'pattern']">
+                    Your email must be like a regular email.
+                </div>
+            </div>
+        </md-input-container>
+        <div layout="row">
+            <md-input-container class="md-block" flex>
+                <label>Client Name</label>
+                <input required name="name" ng-model="project.name" id="name" ng-pattern="/^[ a-zA-Z]+$/">
+                <div ng-messages="projectForm.name.$error" role="alert">
+                    <div ng-message="required">This field is required.</div>
+                    <div ng-message="pattern">This field contains invalid characters.</div>
+                </div>
+            </md-input-container>
+            <md-input-container class="md-block" flex>
+                <label>Client Surname</label>
+                <input required name="surname" ng-model="project.surname" id="surname" ng-pattern="/^[ a-zA-Z]+$/">
+                <div ng-messages="projectForm.surname.$error" role="alert">
+                    <div ng-message="required">This field is required.</div>
+                    <div ng-message="pattern">This field contains invalid characters.</div>
+                </div>
+            </md-input-container>
+        </div>
+        <div layout="row" flex>
+            <md-input-container class="md-block" flex>
+                <label>Client Address</label>
+                <input required name="address" ng-model="project.address" id="address">
+                <div ng-messages="projectForm.address.$error">
+                    <div ng-message="required">This is required.</div>
+                </div>
+            </md-input-container>
+        </div>
+        <div layout="row" flex>
+            <md-input-container class="md-block" flex>
+                <label>Client City</label>
+                <input required name="city" ng-model="project.city" id="city" ng-pattern="/^[ a-zA-Z]+$/">
+                <div ng-messages="projectForm.city.$error" role="alert">
+                    <div ng-message="required">This field is required.</div>
+                    <div ng-message="pattern">This field contains invalid characters.</div>
+                </div>
+            </md-input-container>
+            <md-input-container class="md-block" flex>
+                <label>State</label>
+                <md-select ng-model="project.state" required>
+                    <md-option ng-repeat="state in states" ng-value="state" required>
+                        {{state}}
+                    </md-option>
+                </md-select>
+                <input value="{{project.state}}" name="state" type="hidden">
+                <div ng-show="project.state==''" role="alert">
+                    <div>State is required.</div>
+                </div>
+            </md-input-container>
+        </div>
+        <md-button type="submit" class="md-raised md-accent" flex>
+            Update
+        </md-button>
+        <md-button type="submit" class="md-raised md-primary" flex ui-sref='view'>
+            Go Back
+        </md-button>
+    </form>
+    <h3 ng-bind="errormsg">
+</h3>
+</div>

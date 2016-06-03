@@ -1,0 +1,47 @@
+<!-- VIEW FORM -->
+
+<md-list flex>
+
+  <md-list-item class="secondary-button-padding" ng-click="onCheckClick($index)" ng-repeat="item in accounts" layout="row">
+      <p class='admOnly'>{{item.acc_type}}</p>
+      <p>{{item.ammount}}</p>
+      <p>{{item.card_number}}</p>
+      <md-checkbox class="md-secondary" ng-model="item.check" ng-click="onSecondClick($index)" ></md-checkbox>
+  </md-list-item>
+</md-list>
+<div layout="row">
+    <md-button type="submit" flex ng-disabled="start==0" ng-click="goBack()">
+        Previous page
+    </md-button>
+    <md-button type="submit" flex ng-disabled="users.length<maxSel" ng-click="goNext()">
+        Next page
+    </md-button>
+<md-input-container flex >
+        <label>Per Page</label>
+    <md-select ng-model="maxSel" md-on-close="reset()">
+          <md-option ng-repeat="bound in bounds" value="{{bound}}" >
+            {{bound}}
+          </md-option>
+        </md-select>
+        </md-input-container>
+    </div>
+<div layout="row">
+    <md-button type="submit" flex ui-sref='open_acc({id: id})'>
+        Open Account
+    </md-button>
+    <form name="removeForm" layout="column" method="POST" id="removeForm" ng-submit="doDelete()" flex>
+        <input type="hidden" name="{{csrfParameter}}" value="{{csrfToken}}" />
+      <input type="hidden" name="card_number" id="card_number" value="{{card_number}}">
+      <md-button type="submit" flex ng-disabled="selected==0">
+          Close Accounts
+      </md-button>
+    </form>
+        <label ng-bind="accounts[curindex].card_number" flex>Copy paste it from here
+      </label>
+    </div>
+<div layout="row">
+        <md-button type="submit" class="md-raised md-primary" flex  ui-sref='view' flex>
+            Go Back
+        </md-button>
+        </div>
+    <h3 ng-bind="errormsg">

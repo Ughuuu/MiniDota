@@ -1,0 +1,53 @@
+<form ng-cloak name="sendForm" layout="column" method="POST" id="sendForm" ng-submit="send()">
+    <input type="hidden" name="{{csrfParameter}}" value="{{csrfToken}}" />
+    <md-input-container class="md-block" flex>
+        <label>Client Account Number</label>
+        <input required name="from" ng-model="project.from" id="from" ng-pattern="/^[0-9]{16}$/" md-maxlength="16" />
+        <div ng-messages="sendForm.from.$error" role="alert" multiple>
+            <div ng-message="pattern" class="my-message">
+                Use exactly 16 digits.
+            </div>
+            <div ng-message="maxlength" class="my-message">
+                Use exactly 16 digits.
+            </div>
+            <div ng-message="required" class="my-message">
+                You must enter a code.
+            </div>
+        </div>
+    </md-input-container>
+    <md-input-container class="md-block">
+        <label>Sender Ammount</label>
+        <input required type="number" name="ammount" step="10" min="10" max="20000" ng-model="project.ammount" />
+        <div ng-messages="sendForm.email.$error" role="alert">
+            <div ng-message-exp="required">
+                This number is required.
+            </div>
+            <div ng-message-exp="min">
+                You should send at least 10$.
+            </div>
+            <div ng-message-exp="max">
+                You can send at most 20000$.
+            </div>
+        </div>
+    </md-input-container>
+    <md-input-container class="md-block" flex>
+        <label>Client Account Number</label>
+        <input required name="to" ng-model="project.to" id="to" ng-pattern="/^[0-9]{16}$/" md-maxlength="16" />
+        <div ng-messages="sendForm.to.$error" role="alert" multiple>
+            <div ng-message="pattern" class="my-message">
+                Use exactly 16 digits.
+            </div>
+            <div ng-message="maxlength" class="my-message">
+                Use exactly 16 digits.
+            </div>
+            <div ng-message="required" class="my-message">
+                You must enter a code.
+            </div>
+        </div>
+    </md-input-container>
+    <md-button type="submit" class="md-raised md-accent" flex>
+        Send
+    </md-button>
+</form>
+<h3 ng-bind="errormsg">
+</h3>
