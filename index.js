@@ -29,8 +29,11 @@ io.on('connection', function(socket){
     });
 
 	socket.on('chat message', function(msg){
-	  	io.emit('chat message', msg);
-		console.log("Name: "+ name + " says " + msg);
+		var player = new Object();
+		player.name = PLAYER_LIST[socket.id].name;
+		player.msg = msg;
+	  	io.emit('chat message', player);
+
 	});
 
 	socket.on('disconnect',function(){

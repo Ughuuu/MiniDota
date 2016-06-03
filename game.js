@@ -73,14 +73,6 @@ $(window).on('beforeunload', function(){
     socket.close();
 });
 
-function doConn(){      
-      var nameCurrent = $('#send').val();
-      socket.emit('makePlayer',{name:nameCurrent});
-      $('#send').val('');
-      $('#hellomsg').text(nameCurrent);
-      $('#button').text('Send');
-}
-
 function rgbToHex(r, g, b) {
     return ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
