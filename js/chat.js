@@ -1,19 +1,9 @@
-var socket = io();
-
 socket.on('chat message', function(player){
 	console.log(player.msg);
 });
 
 socket.on('chat event',function(data){
 	//empty player list and update it
-});
-
-var app = angular.module('MainScreen', ['ngAnimate', 'ngAria', 'ngMaterial', 'ngMessages']);
-
-app.config(function($mdThemingProvider) {
-    $mdThemingProvider.theme('default')
-        .primaryPalette('brown')
-        .accentPalette('amber');
 });
 
 app.controller('MainChat', ['$scope', function($scope) {
