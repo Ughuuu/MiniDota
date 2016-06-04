@@ -71,6 +71,7 @@ function removeDisconnected(){
 	        delete PLAYER_LIST[player.id];
         }
     }
+    sendData(computeData())
 }
 
 function computeData(){	

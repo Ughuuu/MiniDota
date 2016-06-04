@@ -23,100 +23,51 @@
 
     <script src="js/chat.js"></script>
 
-    <script src="js/game.js"></script>
+    <!--<script src="js/game.js"></script>-->
 
   </head>
   <body ng-app="MainScreen" ng-cloak>
     <div id="canvasHolder">
     </div>
 
-    <!--
-    <div ng-controller="MainChat">
-      <md-content>
-        <div>
-          <md-input-container>
-            <span id="hellomsg">Enter Your Name:</span><input id="send" type="text" name="Name" value="Dutzuuuul">
-            <md-button id="button" ng-click="doConnection" class="md-raised">Connect!</md-button>
+  <div ng-controller="ChatCtrl" ng-cloak style="bottom: 40px;">
+
+    <md-content layout="row" layout-sm="column" layout-wrap>
+      <md-content layout="row" layout-sm="column" layout-align="center center" layout-wrap>
+
+          <md-input-container style="margin-top: 50px;">
+            <label id="name-label">Enter your name</label>
+            <input ng-model="nameCurrent" id="send">
           </md-input-container>
+          <md-button class="md-raised md-primary" id="button" ng-click="doConnection()">Connect</md-button>
+      </md-content>
+
+      <md-content layout="row" layout-sm="column" layout-align="center center" layout-wrap>
+        <div flex-gt-sm="50" flex>
+          <md-list flex>
+            <md-subheader class="md-no-sticky">Messages</md-subheader>
+            <md-list-item class="md-3-line" ng-repeat="message in message_list" ng-click="null">
+              <div class="md-list-item-text" layout="column">
+                <span>{{message.who}}: {{message.what}}</span>
+              </div>
+            </md-list-item>
+          </md-list>
+        </div>
+
+        <div flex-gt-sm="50" flex>
+          <md-list flex>
+            <md-subheader class="md-no-sticky">Players Online:</md-subheader>
+            <md-list-item class="md-3-line" ng-repeat="player in player_list" ng-click="null">
+              <div class="md-list-item-text" layout="column">
+                <span>{{player.name}}[{{player.id}}] is online.</span>
+              </div>
+            </md-list-item>
+          </md-list>
         </div>
       </md-content>
-    </div>
-    -->
 
-    
-
-<div ng-controller="AppCtrl" ng-cloak>
-  <md-content>
-    <section layout="row" layout-sm="column" layout-align="center center" layout-wrap>
-      <md-button>{{title1}}</md-button>
-      <md-button md-no-ink class="md-primary">Primary (md-noink)</md-button>
-      <md-button ng-disabled="true" class="md-primary">Disabled</md-button>
-      <md-button class="md-warn">{{title4}}</md-button>
-      <div class="label">Flat</div>
-    </section>
-    <section layout="row" layout-sm="column" layout-align="center center" layout-wrap>
-      <md-button class="md-raised">Button</md-button>
-      <md-button class="md-raised md-primary">Primary</md-button>
-      <md-button ng-disabled="true" class="md-raised md-primary">Disabled</md-button>
-      <md-button class="md-raised md-warn">Warn</md-button>
-      <div class="label">Raised</div>
-    </section>
-    <section layout="row" layout-sm="column" layout-align="center center" layout-wrap>
-        <md-button class="md-fab" aria-label="Eat cake">
-            <md-icon md-svg-src="img/icons/cake.svg"></md-icon>
-        </md-button>
-        <md-button class="md-fab md-primary" aria-label="Use Android">
-          <md-icon md-svg-src="img/icons/android.svg"></md-icon>
-        </md-button>
-        <md-button class="md-fab" ng-disabled="true" aria-label="Comment">
-            <md-icon md-svg-src="img/icons/ic_comment_24px.svg"></md-icon>
-        </md-button>
-        <md-button class="md-fab md-primary md-hue-2" aria-label="Profile">
-            <md-icon md-svg-src="img/icons/ic_people_24px.svg"></md-icon>
-        </md-button>
-        <md-button class="md-fab md-mini" aria-label="Eat cake">
-            <md-icon md-svg-src="img/icons/cake.svg"></md-icon>
-        </md-button>
-        <md-button class="md-fab md-mini md-primary" aria-label="Use Android">
-          <md-icon md-svg-src="img/icons/android.svg" style="color: greenyellow;"></md-icon>
-        </md-button>
-      <div class="label">FAB</div>
-    </section>
-    <section layout="row" layout-sm="column" layout-align="center center" layout-wrap>
-        <md-button ng-href="{{googleUrl}}" target="_blank">Default Link</md-button>
-        <md-button class="md-primary" ng-href="{{googleUrl}}" target="_blank">Primary Link</md-button>
-        <md-button>Default Button</md-button>
-      <div class="label">Link vs. Button</div>
-    </section>
-    <section layout="row" layout-sm="column" layout-align="center center" layout-wrap>
-      <md-button class="md-primary md-hue-1">Primary Hue 1</md-button>
-      <md-button class="md-warn md-raised md-hue-2">Warn Hue 2</md-button>
-      <md-button class="md-accent">Accent</md-button>
-      <md-button class="md-accent md-raised md-hue-1">Accent Hue 1</md-button>
-      <div class="label">Themed</div>
-    </section>
-    <section layout="row" layout-sm="column" layout-align="center center" layout-wrap>
-      <md-button class="md-icon-button md-primary" aria-label="Settings">
-        <md-icon md-svg-icon="img/icons/menu.svg"></md-icon>
-      </md-button>
-      <md-button class="md-icon-button md-accent" aria-label="Favorite">
-        <md-icon md-svg-icon="img/icons/favorite.svg"></md-icon>
-      </md-button>
-      <md-button class="md-icon-button" aria-label="More">
-        <md-icon md-svg-icon="img/icons/more_vert.svg"></md-icon>
-      </md-button>
-      <md-button href="http://google.com"
-                 title="Launch Google.com in new window"
-                 target="_blank"
-                 ng-disabled="true"
-                 aria-label="Google.com"
-                 class="md-icon-button launch" >
-        <md-icon md-svg-icon="img/icons/launch.svg"></md-icon>
-      </md-button>
-      <div class="label">Icon Button</div>
-    </section>
-  </md-content>
-</div>
+    </md-content>
+  </div>
 
 
 
