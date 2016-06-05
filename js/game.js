@@ -1,92 +1,106 @@
-// You can use either `new PIXI.WebGLRenderer`, `new PIXI.CanvasRenderer`, or `PIXI.autoDetectRenderer`
-// which will try to choose the best renderer for the environment you are in.
-var renderer = new PIXI.autoDetectRenderer(1024, 700, {transparent: true});
-
-// The renderer will create a canvas element for you that you can then insert into the DOM.
-$('#canvasHolder').append(renderer.view);
-
-// You need to create a root container that will hold the scene you want to draw.
-var stage = new PIXI.Container();
-var PLAYERS = [];
-var MAX_PLAYERS = 100;
-var BIG_NR = -100000;
-
-var camera = new PIXI.Container();
-camera.scale.x = 0.5;
-camera.scale.y = 0.5;
-camera.position.x = 500;
-camera.position.y = 350;
-
-var graphics = new PIXI.Graphics();
- 
-// Set the fill color
-graphics.beginFill(0xe74c3c); // Red
- 
-// Draw a circle
-graphics.drawCircle(0, 0, 700); // drawCircle(x, y, radius)
- 
-// Applies fill to lines and shapes since the last call to beginFill.
-graphics.endFill();
-  
-// Add the graphics to the stage
-camera.addChild(graphics);
-
-// load the texture we need
-PIXI.loader.add('gear', 'gear2.png').load(function (loader, resources) {
-    
-    for (var i = 0; i < MAX_PLAYERS; i++) {
-        var player = new PIXI.Sprite(resources.gear.texture);
-        var text = new PIXI.Text("Heya!", {font:"30px Arial", fill:"black"});
-
-        text.position.y = -50;
-
-        var playerContainer = new PIXI.Container();
-        // Setup the position and scale of the bunny
-
-        player.anchor.x = 0.5;
-        player.anchor.y = 0.5;
-
-        player.scale.x = 1;
-        player.scale.y = 1;
-        // Add the bunny to the scene we are building.
-        playerContainer.addChild(text);
-        playerContainer.addChild(player); 
-
-        PLAYERS.push(playerContainer);
-
-        camera.addChild(playerContainer)
+app.controller('InGame', ['$scope', function($scope) {
+    $scope.graphics;
+    $scope.renderer;
+    $scope.stage;
+    $scope.camera;
+    $scope.width = 1024;
+    $scope.height = 524;
+    $scope.refwidth = 1024;
+    $scope.refheight = 524;
+    $scope.MAX_PLAYERS = 500;
+    $scope.PLAYERS = [];    
+    $scope.animate = function () {
+        requestAnimationFrame($scope.animate);
+        $scope.renderer.render($scope.stage);
     }
+    $scope.doneload = function (loader, resources) {
+        var map = new PIXI.Sprite(resources.map.texture);
+        var mapfg = new PIXI.Sprite(resources.mapfg.texture);
+        var mapbg = new PIXI.Sprite(resources.mapbg.texture);
+        map.scale.x = $scope.refheight/1150;
+        map.scale.y = $scope.refheight/1150;
+        map.position.x = $scope.refwidth/2-map.width/2;
+        map.position.y = 53;
+        mapfg.scale.x = $scope.refheight/524;
+        mapfg.scale.y = $scope.refheight/524;
+        mapbg.scale.x = $scope.refheight/524;
+        mapbg.scale.y = $scope.refheight/524;
+        $scope.camera.addChild(mapbg);
+        $scope.camera.addChild(map);
+        $scope.camera.addChild(mapfg);
+        for (var i = 0; i < $scope.MAX_PLAYERS; i++) {
+            var player = new PIXI.Sprite(resources.holder.texture);
 
-    for(var i = 0; i< PLAYERS.length; i++){
-        PLAYERS[i].position.x = BIG_NR;
-        PLAYERS[i].position.y = BIG_NR;        
+            player.anchor.x = 0.5;
+            player.anchor.y = 0.5;
+
+            player.scale.x = 0.1;
+            player.scale.y = 0.1;
+
+            $scope.PLAYERS.push(player);
+
+            //$scope.camera.addChild(player);
+        }
+
+        for(var i = 0; i< $scope.PLAYERS.length; i++){
+            $scope.PLAYERS[i].position.x = Math.random()*1000;
+            $scope.PLAYERS[i].position.y = Math.random()*1000;        
+        }
+
+        // kick off the animation loop (defined below)
+        $scope.animate();
     }
-    // kick off the animation loop (defined below)
-    animate();
-});       
-   
-stage.addChild(camera);
+    $scope.startload = function(){
+        // 04b03
+        PIXI.loader.add('minidota', 'res/minidota.png')
+                   .add('jugg', 'res/jugg.png')
+                   .add('holder', 'res/holder.png')
+                   .add('map', 'res/map.png')
+                   .add('mapbg', 'res/mapbg.png')
+                   .add('mapfg', 'res/mapfg.png')
+                   .add('mini', 'res/mini.png')
+                   //.add('font', 'res/04B_03__.fnt')
+        .load($scope.doneload);
+    }
+    $scope.init = function () {
+        $scope.width = window.innerWidth;
+        $scope.height = $scope.width / 2;
+        $scope.graphics = new PIXI.Graphics();
+        $scope.renderer = new PIXI.autoDetectRenderer($scope.width, $scope.height, {transparent: true});
+        $scope.renderer.view.style.left = ((window.innerWidth - $scope.renderer.width) >> 1) + 'px';
+        $scope.renderer.view.style.display = "block";
+        $scope.renderer.autoResize = true;
+        $('#canvas_holder').append($scope.renderer.view);
+        $scope.stage = new PIXI.Container();
+        $scope.camera = new PIXI.Container();
+        // init camera to center, it shouldn't ever move
+        $scope.camera.scale.x = 1;
+        $scope.camera.scale.y = 1;
+        $scope.camera.position.x = 0;
+        $scope.camera.position.y = 0;
+        
+        $scope.stage.addChild($scope.camera);
+        $scope.startload();
+        $scope.resize();
+        window.onresize = $scope.resize;
+    };
+    $scope.resize = function (event){
+        $scope.width = window.innerWidth;
+        $scope.height = $scope.width / 2;
 
-var socket = io();
+        $scope.renderer.view.style.width = $scope.width + "px";
+        $scope.renderer.view.style.height = $scope.height + "px";
+        $scope.camera.scale.x = $scope.width/1024;
+        $scope.camera.scale.y = $scope.width/1024;
 
-$(window).on('beforeunload', function(){
-    socket.close();
-});
+        $scope.renderer.resize($scope.width,$scope.height);
+    };
+    $scope.init();
+}]);
 
 function rgbToHex(r, g, b) {
     return ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
-
-function getColor(name){
-    var col = 0;
-    for(var i=0; i<name.length; i++){
-        col+=name[i].charCodeAt(0);
-    }
-    col*=1234;
-    col%=16581375;
-    return col;
-}
-
 
 socket.on('gameEvent',function(data){
     var n = data.length;
@@ -103,15 +117,3 @@ socket.on('gameEvent',function(data){
     console.log(data[i].name);
     }
 });
-
-socket.on('chat',function(chat){
-    $('#messages').append("<li>" + chat + "</li>");
-});
-
-function animate() {
-    // start the timer for the next animation loop
-    requestAnimationFrame(animate);
-
-    // this is the main render call that makes pixi draw your container and its children.
-    renderer.render(stage);
-}
