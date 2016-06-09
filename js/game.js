@@ -9,7 +9,11 @@ app.controller('InGame', ['$scope', function($scope) {
     $scope.actwidth = 1024;
     $scope.refheight = 524;
     $scope.MAX_PLAYERS = 500;
-    $scope.PLAYERS = [];    
+    $scope.PLAYERS = [];
+    $scope.play_disabled = 0;
+    $scope.play = function(){
+        socket.emit('play request', 1);
+    }
     $scope.animate = function () {
         $scope.renderer.render($scope.stage);
         requestAnimationFrame($scope.animate);
