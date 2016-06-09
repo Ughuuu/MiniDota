@@ -88,7 +88,7 @@ function computeData(){
         	//send relevant data here
 
             id: player.id,
-            name:player.name
+            name: player.name
         });    
     }
     return gameData;
