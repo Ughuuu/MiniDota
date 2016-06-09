@@ -6,26 +6,27 @@ app.controller('InGame', ['$scope', function($scope) {
     $scope.width = 1024;
     $scope.height = 524;
     $scope.refwidth = 1024;
+    $scope.actwidth = 1024;
     $scope.refheight = 524;
     $scope.MAX_PLAYERS = 500;
     $scope.PLAYERS = [];    
     $scope.animate = function () {
-        requestAnimationFrame($scope.animate);
         $scope.renderer.render($scope.stage);
+        requestAnimationFrame($scope.animate);
     }
     $scope.doneload = function (loader, resources) {
         var map = new PIXI.Sprite(resources.map.texture);
         var mapfg = new PIXI.Sprite(resources.mapfg.texture);
         var mapbg = new PIXI.Sprite(resources.mapbg.texture);
-        map.scale.x = $scope.refheight/1150;
-        map.scale.y = $scope.refheight/1150;
-        map.position.x = $scope.refwidth/2-map.width/2;
-        map.position.y = 53;
+        map.scale.x = $scope.refheight/1120;
+        map.scale.y = $scope.refheight/1120;
+        map.position.x = $scope.refwidth/2-map.width/2+7;
+        map.position.y = 48;
         mapfg.scale.x = $scope.refheight/524;
         mapfg.scale.y = $scope.refheight/524;
         mapbg.scale.x = $scope.refheight/524;
         mapbg.scale.y = $scope.refheight/524;
-        $scope.camera.addChild(mapbg);
+        //$scope.camera.addChild(mapbg);
         $scope.camera.addChild(map);
         $scope.camera.addChild(mapfg);
         for (var i = 0; i < $scope.MAX_PLAYERS; i++) {
@@ -66,7 +67,8 @@ app.controller('InGame', ['$scope', function($scope) {
         $scope.width = window.innerWidth;
         $scope.height = $scope.width / 2;
         $scope.graphics = new PIXI.Graphics();
-        $scope.renderer = new PIXI.autoDetectRenderer($scope.width, $scope.height, {transparent: true});
+        $scope.renderer = new PIXI.autoDetectRenderer($scope.width, $scope.height);
+        $scope.renderer.backgroundColor = 0x283593;
         $scope.renderer.view.style.left = ((window.innerWidth - $scope.renderer.width) >> 1) + 'px';
         $scope.renderer.view.style.display = "block";
         $scope.renderer.autoResize = true;
@@ -85,7 +87,8 @@ app.controller('InGame', ['$scope', function($scope) {
         window.onresize = $scope.resize;
     };
     $scope.resize = function (event){
-        $scope.width = window.innerWidth;
+        $scope.actwidth = window.innerWidth;
+        $scope.width = Math.min(window.innerWidth, (window.innerHeight-200)*2);
         $scope.height = $scope.width / 2;
 
         $scope.renderer.view.style.width = $scope.width + "px";
@@ -96,6 +99,9 @@ app.controller('InGame', ['$scope', function($scope) {
         $scope.renderer.resize($scope.width,$scope.height);
     };
     $scope.init();
+    $scope.play = function(){
+
+    };
 }]);
 
 function rgbToHex(r, g, b) {

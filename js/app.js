@@ -5,5 +5,8 @@ var app = angular.module('MainScreen', ['ngAnimate', 'ngAria', 'ngMaterial', 'ng
 app.config(function($mdThemingProvider) {
     $mdThemingProvider.theme('default')
         .primaryPalette('blue')
-        .accentPalette('deep-orange');
+        .accentPalette('deep-orange')
+        .warnPalette('red')
+   		.backgroundPalette('indigo')
+   		.dark();
 });

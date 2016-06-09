@@ -2,6 +2,7 @@ app.controller('ChatCtrl', function($scope) {
 	$scope.player_list = [];
 	$scope.message_list = [];
   $scope.nameCurrent = '';
+  $scope.currentNavItem = 'page1';
 
   $scope.doConnection = function() {
       if (angular.element(document.querySelector('#button')).text() == "Connect") {
