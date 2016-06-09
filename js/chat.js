@@ -1,31 +1,41 @@
-socket.on('chat message', function(player){
-	console.log(player.msg);
-});
-
-socket.on('chat event',function(data){
-	//empty player list and update it
-});
-
-app.controller('MainChat', ['$scope', function($scope) {
+app.controller('ChatCtrl', function($scope) {
 	$scope.player_list = [];
 	$scope.message_list = [];
+  $scope.nameCurrent = '';
 
-    $scope.doConnection = function(){
-        if (angular.element('#button').text() == "Connect!") {
-            var nameCurrent = angular.element('#send').text();
-            socket.emit('makePlayer',{name:nameCurrent});
-            angular.element('#send').val('');
-            angular.element('#button').text("Send");
-        } else {
-            socket.emit('chat message', angular.element('#send').val());
-            angular.element('#send').val('');
-        }  
-    };
-}]);
+  $scope.doConnection = function() {
+      if (angular.element(document.querySelector('#button')).text() == "Connect") {
+        socket.emit('makePlayer',{name: $scope.nameCurrent});
+        angular.element(document.querySelector('#button')).text('Send');
+        angular.element(document.querySelector('#send')).val('');
+        angular.element(document.querySelector('#name-label')).text('');
+      } else {
+        var msg = angular.element(document.querySelector('#send')).val();
+        if (msg != '') {
+          socket.emit('chat message', msg);
+          angular.element(document.querySelector('#send')).val('');
+        }
+      }
+      
+  };
 
-app.controller('AppCtrl', function($scope) {
-  $scope.title1 = 'Button';
-  $scope.title4 = 'Warn';
-  $scope.isDisabled = true;
-  $scope.googleUrl = 'http://google.com';
+  socket.on('chat message', function(player){
+    var msg = new Object();
+    msg.who = player.name;
+    msg.what = player.msg;
+    $scope.message_list.push(msg);
+    $scope.$apply();
+  });
+
+  socket.on('chat event',function(data){
+    $scope.player_list = [];
+    for (var i in data) {
+      var player = new Object();
+      player.name = data[i].name;
+      player.id = data[i].id;
+      $scope.player_list.push(player);
+    }
+    $scope.$apply();
+  });
+
 });
