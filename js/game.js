@@ -114,6 +114,6 @@ socket.on('gameEvent',function(data){
         PLAYERS[i].getChildAt(0).text = data[i].name;
         PLAYERS[i].getChildAt(0).position.x = -data[i].name.length*8;
         PLAYERS[i].getChildAt(1).tint = getColor(data[i].name);
-    console.log(data[i].name);
+        console.log(data[i].name);
     }
 });
