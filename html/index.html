@@ -1,82 +1,79 @@
 <!doctype html>
 <html>
-
-<head>
-    <title>Mini Dota</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="js/jquery-2.2.4.min.js"></script>
-    <!-- Angular Material style sheet -->
-    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
-    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
-    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
-    <!-- Angular Material Library -->
-    <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="js/pixi.min.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/chat.js"></script>
-    <script src="js/game.js"></script>
-</head>
-
-<body ng-app="MainScreen" ng-cloak style="bottom: 40px;" bgcolor="#E6E6FA">
-    <div ng-controller="InGame">
-        <md-content>
+    <head>
+        <title>Mini Dota</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="js/jquery-2.2.4.min.js"></script>
+        <!-- Angular Material style sheet -->
+        <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
+        <!-- Angular Material Library -->
+        <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="js/pixi.min.js"></script>
+        <script src="js/app.js"></script>
+        <script src="js/chat.js"></script>
+        <script src="js/game.js"></script>
+    </head>
+    <body ng-app="MainScreen" ng-cloak style="bottom: 40px;" bgcolor="#E6E6FA">
+        <div ng-controller="InGame">
+            <md-content>
             <center id="canvas_holder">
             </center>
-        </md-content>
-        <md-button class="md-fab md-primary" type="button" style="position:fixed; top:{{height - 80}}px; left:{{actwidth/2 - 35}}px;" ng-click="play()">
+            </md-content>
+            <md-button class="md-fab md-primary" type="button" style="position:fixed; top:{{height - 80}}px; left:{{actwidth/2 - 35}}px;" ng-click="play()">
             Play
-        </md-button>
-        <md-divider></md-divider>
-    </div>
-    <div ng-controller="ChatCtrl" ng-cloak>
-        <md-content layout="row" layout-wrap>
+            </md-button>
+            <md-divider></md-divider>
+        </div>
+        <div ng-controller="ChatCtrl" ng-cloak>
+            <md-content layout="row" layout-wrap>
             <md-tabs md-dynamic-height md-border-bottom>
-                <md-tab id="tab1">
-                    <md-tab-label>Chat</md-tab-label>
-                    <md-tab-body>
-                        <md-content layout="row" layout-align="center center" layout-wrap>
-                            <md-input-container>
-                                <label id="name-label">Enter your name</label>
-                                <input ng-model="nameCurrent" id="send">
-                            </md-input-container>
-                            <md-button class="md-raised md-primary" id="button" ng-click="doConnection()" ng-keyup=doConnection()" type="button">Connect</md-button>
-                        </md-content>
-                        <md-content layout="row" layout-align="center center" layout-wrap>
-                            <div flex-gt-sm="50" flex>
-                                <md-list flex>
-                                    <md-subheader class="md-no-sticky">Messages</md-subheader>
-                                    <md-list-item class="md-3-line" ng-repeat="message in message_list" ng-click="null">
-                                        <div class="md-list-item-text" layout="column">
-                                            <span>{{message.who}}: {{message.what}}</span>
-                                        </div>
-                                    </md-list-item>
-                                </md-list>
-                            </div>
-                            <div flex-gt-sm="50" flex>
-                                <md-list flex>
-                                    <md-subheader class="md-no-sticky">Players Online:</md-subheader>
-                                    <md-list-item class="md-3-line" ng-repeat="player in player_list" ng-click="null">
-                                        <div class="md-list-item-text" layout="column">
-                                            <span>{{player.name}}[{{player.id}}] is online.</span>
-                                        </div>
-                                    </md-list-item>
-                                </md-list>
-                            </div>
-                        </md-content>
-                    </md-tab-body>
-                </md-tab>
-                <md-tab id="tab2">
-                    <md-tab-label>Popular Games</md-tab-label>
-                    <md-tab-body>
-                    IN WORK IN WORK IN WORK IN WORK IN WORK IN WORK
-                    </md-tab-body>
-                </md-tab>
+            <md-tab id="tab1">
+            <md-tab-label>Chat</md-tab-label>
+            <md-tab-body>
+            <md-content layout="row" layout-align="center center" layout-wrap>
+            <md-input-container>
+            <label id="name-label">Enter your name</label>
+            <input ng-model="nameCurrent" id="send">
+            </md-input-container>
+            <md-button class="md-raised md-primary" id="button" ng-click="doConnection()" ng-keyup=doConnection()" type="button">Connect</md-button>
+            </md-content>
+            <md-content layout="row" layout-align="center center" layout-wrap>
+            <div flex-gt-sm="50" flex>
+                <md-list flex>
+                <md-subheader class="md-no-sticky">Messages</md-subheader>
+                <md-list-item class="md-3-line" ng-repeat="message in message_list" ng-click="null">
+                <div class="md-list-item-text" layout="column">
+                    <span>{{message.who}}: {{message.what}}</span>
+                </div>
+                </md-list-item>
+                </md-list>
+            </div>
+            <div flex-gt-sm="50" flex>
+                <md-list flex>
+                <md-subheader class="md-no-sticky">Players Online:</md-subheader>
+                <md-list-item class="md-3-line" ng-repeat="player in player_list" ng-click="null">
+                <div class="md-list-item-text" layout="column">
+                    <span>{{player.name}}[{{player.id}}] is online.</span>
+                </div>
+                </md-list-item>
+                </md-list>
+            </div>
+            </md-content>
+            </md-tab-body>
+            </md-tab>
+            <md-tab id="tab2">
+            <md-tab-label>Popular Games</md-tab-label>
+            <md-tab-body>
+            IN WORK IN WORK IN WORK IN WORK IN WORK IN WORK
+            </md-tab-body>
+            </md-tab>
             </md-tabs>
-        </md-content>
-    </div>
-</body>
-
+            </md-content>
+        </div>
+    </body>
 </html>

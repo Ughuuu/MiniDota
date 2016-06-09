@@ -5,18 +5,19 @@ app.controller('ChatCtrl', function($scope) {
   $scope.currentNavItem = 'page1';
 
   $scope.doConnection = function() {
-      if (angular.element(document.querySelector('#button')).text() == "Connect") {
-        socket.emit('makePlayer',{name: $scope.nameCurrent});
-        angular.element(document.querySelector('#button')).text('Send');
-        angular.element(document.querySelector('#send')).val('');
-        angular.element(document.querySelector('#name-label')).text('');
-      } else {
+      if (angular.element(document.querySelector('#button')).text() == "Send") {
         var msg = angular.element(document.querySelector('#send')).val();
         if (msg != '') {
           socket.emit('chat message', msg);
           angular.element(document.querySelector('#send')).val('');
         }
       }
+      else if (angular.element(document.querySelector('#button')).text() == "Connect") {
+        socket.emit('makePlayer',{name: $scope.nameCurrent});
+        angular.element(document.querySelector('#button')).text('Send');
+        angular.element(document.querySelector('#send')).val('');
+        angular.element(document.querySelector('#name-label')).text('');
+      } else return;  
       
   };
 
