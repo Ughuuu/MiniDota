@@ -13,7 +13,7 @@ app.controller('ChatCtrl', function($scope) {
         }
       }
       else if (angular.element(document.querySelector('#button')).text() == "Connect") {
-        socket.emit('makePlayer',{name: $scope.nameCurrent});
+        socket.emit('make player',{name: $scope.nameCurrent});
         angular.element(document.querySelector('#button')).text('Send');
         angular.element(document.querySelector('#send')).val('');
         angular.element(document.querySelector('#name-label')).text('');
