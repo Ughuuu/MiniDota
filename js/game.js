@@ -1,4 +1,4 @@
-app.controller('InGame', ['$scope', function($scope) {
+app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
     $scope.graphics;
     $scope.renderer;
     $scope.stage;
@@ -10,14 +10,17 @@ app.controller('InGame', ['$scope', function($scope) {
     $scope.refheight = 524;
     $scope.MAX_PLAYERS = 500;
     $scope.PLAYERS = [];
-    $scope.play_disabled = 0;
+    $scope.play_disabled = false;
+    $scope.play_text = "Play";
     $scope.play = function(){
-        socket.emit('play request', 1);
-    }
+        socket.emit('play request', true);
+        $scope.play_disabled = true;
+        $scope.play_text = "Find";
+    };
     $scope.animate = function () {
         $scope.renderer.render($scope.stage);
         requestAnimationFrame($scope.animate);
-    }
+    };
     $scope.doneload = function (loader, resources) {
         var map = new PIXI.Sprite(resources.map.texture);
         var mapfg = new PIXI.Sprite(resources.mapfg.texture);
@@ -54,7 +57,7 @@ app.controller('InGame', ['$scope', function($scope) {
 
         // kick off the animation loop (defined below)
         $scope.animate();
-    }
+    };
     $scope.startload = function(){
         // 04b03
         PIXI.loader.add('minidota', 'res/minidota.png')
@@ -66,7 +69,7 @@ app.controller('InGame', ['$scope', function($scope) {
                    .add('mini', 'res/mini.png')
                    //.add('font', 'res/04B_03__.fnt')
         .load($scope.doneload);
-    }
+    };
     $scope.init = function () {
         $scope.width = window.innerWidth;
         $scope.height = $scope.width / 2;
@@ -103,27 +106,47 @@ app.controller('InGame', ['$scope', function($scope) {
         $scope.renderer.resize($scope.width,$scope.height);
     };
     $scope.init();
-    $scope.play = function(){
-
-    };
+    function rgbToHex(r, g, b) {
+        return ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+    socket.on('gameEvent',function(data){
+        var n = data.length;
+        if(PLAYERS.length < n){
+            n = PLAYERS.length;
+        }
+        for(var i = 0 ; i < n; i++){
+            PLAYERS[i].position.x = data[i].x;
+            PLAYERS[i].position.y = -data[i].y;
+            PLAYERS[i].getChildAt(1).rotation = data[i].ang;
+            PLAYERS[i].getChildAt(0).text = data[i].name;
+            PLAYERS[i].getChildAt(0).position.x = -data[i].name.length*8;
+            PLAYERS[i].getChildAt(1).tint = getColor(data[i].name);
+            console.log(data[i].name);
+        }
+    });
+    socket.on('play registered',function(data){
+        if(data == true){
+            $scope.play_text = "Wait";
+        }else{
+            $scope.play_text = "Error";
+            $mdToast.show(
+              $mdToast.simple()
+                .textContent('Name is required!')
+                .position("bottom right")
+                .hideDelay(3000)
+            ).then(function(response){
+                $scope.play_text = "Play";
+                $scope.play_disabled = false;
+            });
+        }
+    });
+    socket.on('play start',function(data){
+        $scope.play_text = "Found";
+        alert("play started " + data);
+    });
+    socket.on('game over',function(data){
+        $scope.play_text = "Play";
+        $scope.play_disabled = false;
+        alert("game over " + data);
+    });
 }]);
-
-function rgbToHex(r, g, b) {
-    return ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-}
-
-socket.on('gameEvent',function(data){
-    var n = data.length;
-    if(PLAYERS.length < n){
-        n = PLAYERS.length;
-    }
-    for(var i = 0 ; i < n; i++){
-        PLAYERS[i].position.x = data[i].x;
-        PLAYERS[i].position.y = -data[i].y;
-        PLAYERS[i].getChildAt(1).rotation = data[i].ang;
-        PLAYERS[i].getChildAt(0).text = data[i].name;
-        PLAYERS[i].getChildAt(0).position.x = -data[i].name.length*8;
-        PLAYERS[i].getChildAt(1).tint = getColor(data[i].name);
-        console.log(data[i].name);
-    }
-});

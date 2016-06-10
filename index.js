@@ -15,6 +15,8 @@ app.get('/', function(req, res){
 var SOCKET_LIST = {};
 var PLAYER_LIST = {};
 var NEW_PLAYER_LIST = [];
+var PLAYER_FIND_LIST = [];
+var GAME_LIST = new Map();
 var GLOBAL_ID = 0;
 var PLAYERS = 0;
 var timeStep = 1000 / 60.0;
@@ -32,6 +34,16 @@ io.on('connection', function(socket){
 	 	NEW_PLAYER_LIST.push({id:socket.id, name:name.name});
     });
 
+    socket.on('play request', function(input){
+        if(PLAYER_LIST[socket.id] == null){
+            SOCKET_LIST[socket.id].emit("play registered", false);
+        }else {
+            console.log(socket.id);
+            SOCKET_LIST[socket.id].emit("play registered", true);
+            PLAYER_FIND_LIST.push(socket.id);
+        }      
+    });
+
 	socket.on('chat message', function(msg){
 		var player = new Object();
 		player.name = PLAYER_LIST[socket.id].name;
@@ -40,16 +52,20 @@ io.on('connection', function(socket){
 	});
 
 	socket.on('disconnect',function(){
+        console.log("dc");
 	    delete SOCKET_LIST[socket.id];
     	if(PLAYER_LIST[socket.id] == null)
     		return;
     	PLAYER_LIST[socket.id].destroy = true;
 		PLAYERS--;
+        if(GAME_LIST.get(socket.id) != undefined){
+            gameOver(socket.id, GAME_LIST.get(socket.id), GAME_LIST.get(socket.id));
+        }
     });
 });
 
-function connectNewPlayers(){	
-	for (var i = NEW_PLAYER_LIST.length - 1; i >= 0; i--) {
+function connectNewPlayers(){
+	for (var i in NEW_PLAYER_LIST) {
 		var id = NEW_PLAYER_LIST[i].id;
 		var name = NEW_PLAYER_LIST[i].name;
 		if(PLAYER_LIST[id] != null){
@@ -101,11 +117,56 @@ function sendData(data){
     }
 }
 
+function findGames(){
+    var last = null;
+    for (var i in PLAYER_FIND_LIST) {
+        var id = PLAYER_FIND_LIST[i];
+        // here get player, maybe later we might compute mmr or something
+        var player = PLAYER_LIST[id];
+        if(last == null){
+            last = player;
+        }else{
+            console.log(player.id + " " + last.id);
+            makeGame(player.id, last.id);
+            last = null;
+        }
+    }
+    if (PLAYER_FIND_LIST.length != 1) {
+        // save the last for further games
+        if(PLAYER_FIND_LIST.length %2 == 1){
+            var player = PLAYER_FIND_LIST[PLAYER_FIND_LIST.length-1];
+            PLAYER_FIND_LIST = [];
+            PLAYER_FIND_LIST.push(player);
+        }else{
+            PLAYER_FIND_LIST = [];
+        }
+    }
+}
+
+function makeGame(id1, id2, winner){
+    GAME_LIST.set(id1, id2);
+    GAME_LIST.set(id2, id1);
+    SOCKET_LIST[id1].emit("play start", id2);
+    SOCKET_LIST[id2].emit("play start", id1);
+}
+
+
+function gameOver(id1, id2, winner){    
+    GAME_LIST.delete(id1);
+    GAME_LIST.delete(id2);
+    if(SOCKET_LIST[id1] != undefined)
+    SOCKET_LIST[id1].emit("game over", winner);
+    if(SOCKET_LIST[id2] != undefined)
+    SOCKET_LIST[id2].emit("game over", winner);
+}
+
 function updatePlayers(){
 	connectNewPlayers();
 
 	removeDisconnected();
 
+    findGames();
+    
 	//var gameData = computeData();
 
 	//sendData(gameData);

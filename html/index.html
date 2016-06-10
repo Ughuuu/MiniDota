@@ -26,8 +26,8 @@
             <center id="canvas_holder">
             </center>
         </md-content>
-        <md-button class="md-fab md-primary" type="button" style="position:fixed; top:{{height - 80}}px; left:{{actwidth/2 - 35}}px;" ng-click="play()" ng-disable="play_disabled == 1">
-            Play
+        <md-button class="md-fab md-primary" style="position:fixed; top:{{height - 80}}px; left:{{actwidth/2 - 35}}px;" ng-click="play()" ng-disabled="play_disabled">
+            {{play_text}}
         </md-button>
         <md-divider></md-divider>
     </div>
@@ -42,7 +42,7 @@
                                 <label id="name-label">Enter your name</label>
                                 <input ng-model="nameCurrent" id="send">
                             </md-input-container>
-                            <md-button class="md-raised md-primary" id="button" ng-click="doConnection()" ng-keyup=doConnection()" type="button">Connect</md-button>
+                            <md-button class="md-raised md-primary" id="button" ng-click="doConnection()" ng-keyup="doConnection()" type="button">Connect</md-button>
                         </md-content>
                         <md-content layout="row" layout-align="center center" layout-wrap>
                             <div flex-gt-sm="50" flex>
@@ -71,7 +71,7 @@
                 <md-tab id="tab2">
                     <md-tab-label>Popular Games</md-tab-label>
                     <md-tab-body>
-                    IN WORK IN WORK IN WORK IN WORK IN WORK IN WORK
+                        IN WORK IN WORK IN WORK IN WORK IN WORK IN WORK
                     </md-tab-body>
                 </md-tab>
             </md-tabs>
