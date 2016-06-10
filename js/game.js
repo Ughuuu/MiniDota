@@ -71,6 +71,8 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
         .load($scope.doneload);
     };
     $scope.init = function () {
+        $scope.startload();
+
         $scope.width = window.innerWidth;
         $scope.height = $scope.width / 2;
         $scope.graphics = new PIXI.Graphics();
@@ -89,7 +91,7 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
         $scope.camera.position.y = 0;
         
         $scope.stage.addChild($scope.camera);
-        $scope.startload();
+
         $scope.resize();
         window.onresize = $scope.resize;
     };
@@ -125,6 +127,7 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
         }
     });
     socket.on('play registered',function(data){
+        console.log("action");
         if(data == true){
             $scope.play_text = "Wait";
         }else{
@@ -141,10 +144,12 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
         }
     });
     socket.on('play start',function(data){
+        console.log("action");
         $scope.play_text = "Found";
         alert("play started " + data);
     });
     socket.on('game over',function(data){
+        console.log("action");
         $scope.play_text = "Play";
         $scope.play_disabled = false;
         alert("game over " + data);
