@@ -18,6 +18,7 @@ var NEW_PLAYER_LIST = [];
 var GLOBAL_ID = 0;
 var PLAYERS = 0;
 var timeStep = 1000 / 60.0;
+var MAP = {};
 
 io.on('connection', function(socket){
 
@@ -75,7 +76,7 @@ function removeDisconnected(){
 	        delete PLAYER_LIST[player.id];
         }
     }
-    sendData(computeData())
+    sendData(computeData());
 }
 
 function computeData(){	
@@ -122,6 +123,38 @@ var Player = function(id, name, room){
     return self;
 }
 
+var Node = function(x, y, height, id) {
+    var self = {
+        id: id,
+        neighbours: [],
+        x: x,
+        y: y,
+        height: height,
+        addNeigh: function(name) {
+            this.neighbours.push(name);
+        }
+    };
+    return self;
+};
+
+var createMap = function() {
+    var fs = require('fs');
+    var lines = fs.readFileSync('map.graph').toString().split("\n");
+    var n = lines[0];
+    for (var i = 1; i <= n; ++i) {
+        var details = lines[i].toString().split(' '); 
+        MAP[details[0]] = Node(details[1], details[2], details[3], details[0]);
+    }
+    for (var i = +n + 1; i < lines.length; ++i) {
+        var nodes = lines[i].toString().split(' ');
+        for (var j = 0; j < nodes.length - 1; ++j) {
+            MAP[nodes[j]].addNeigh(MAP[nodes[j + 1]].id);
+            MAP[nodes[j + 1]].addNeigh(MAP[nodes[j]].id);
+        }
+    }
+};
+
 http.listen(3000, function(){
   console.log('listening on *:3000');
+  createMap();
 });

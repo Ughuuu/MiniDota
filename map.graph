@@ -1,0 +1,9 @@
+5
+base 0 0 3
+fountain 1 1 2
+mid 5 5 1
+river 5 6 0
+tier1 3 4 3
+tier1 base fountain
+base mid
+base river
