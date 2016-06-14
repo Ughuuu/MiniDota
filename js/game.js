@@ -1,133 +1,142 @@
 app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
-    $scope.graphics;
-    $scope.renderer;
-    $scope.stage;
-    $scope.camera;
-    $scope.width = 1024;
+    var graphics;
+    var renderer;
+    var stage;
+    var camera;
+    var width = 1024;
     $scope.height = 524;
-    $scope.refwidth = 1024;
+    var refwidth = 1024;
+    var refheight = 524;
+    var MAX_PLAYERS = 201;
+    var START_X = 311;
+    var START_Y = 470;
+    var PLAYERS = [];
+    var SHADOWS = [];
+    var SHADOW_ON = true;
+    var res;
+    var chat_size = 100;
     $scope.actwidth = 1024;
-    $scope.refheight = 524;
-    $scope.MAX_PLAYERS = 500;
-    $scope.PLAYERS = [];
     $scope.play_disabled = false;
     $scope.play_text = "Play";
+    var heroes;
     $scope.play = function(){
         socket.emit('play request', true);
         $scope.play_disabled = true;
         $scope.play_text = "Find";
     };
-    $scope.animate = function () {
-        $scope.renderer.render($scope.stage);
-        requestAnimationFrame($scope.animate);
+    var animate = function () {
+        renderer.render(stage);
+        requestAnimationFrame(animate);
     };
-    $scope.doneload = function (loader, resources) {
-        var map = new PIXI.Sprite(resources.map.texture);
-        var mapfg = new PIXI.Sprite(resources.mapfg.texture);
-        var mapbg = new PIXI.Sprite(resources.mapbg.texture);
-        map.scale.x = $scope.refheight/1120;
-        map.scale.y = $scope.refheight/1120;
-        map.position.x = $scope.refwidth/2-map.width/2+7;
+    var doneload = function (loader, resources) {
+        res = resources;
+        var map = new PIXI.Sprite(res.map.texture);
+        var mapfg = new PIXI.Sprite(res.mapfg.texture);
+        map.scale.x = refheight/1120;
+        map.scale.y = refheight/1120;
+        map.position.x = refwidth/2-map.width/2+7;
         map.position.y = 48;
-        mapfg.scale.x = $scope.refheight/524;
-        mapfg.scale.y = $scope.refheight/524;
-        mapbg.scale.x = $scope.refheight/524;
-        mapbg.scale.y = $scope.refheight/524;
-        //$scope.camera.addChild(mapbg);
-        $scope.camera.addChild(map);
-        $scope.camera.addChild(mapfg);
-        for (var i = 0; i < $scope.MAX_PLAYERS; i++) {
-            var player = new PIXI.Sprite(resources.holder.texture);
+        mapfg.scale.x = refheight/524;
+        mapfg.scale.y = refheight/524;
+        camera.addChild(map);
+        heroes = res.chibi.textures;
+        for (var i = 0; i < MAX_PLAYERS; i++) {
+            var player = new PIXI.Sprite(heroes["creep_dire"]);
 
             player.anchor.x = 0.5;
             player.anchor.y = 0.5;
 
-            player.scale.x = 0.1;
-            player.scale.y = 0.1;
+            player.scale.x = 0.5;
+            player.scale.y = 0.5;
 
-            $scope.PLAYERS.push(player);
+            if(SHADOW_ON){
+                var shadow = new PIXI.Sprite(heroes["creep_dire"]);
+                shadow.anchor.x = 0.07;
+                shadow.anchor.y = 0.8;
 
-            //$scope.camera.addChild(player);
+                shadow.scale.x = 0.5;
+                shadow.scale.y = 1;
+                shadow.rotation = 1;
+                shadow.tint = 0x000000;
+                shadow.alpha = 0.4;
+                SHADOWS.push(shadow);
+            }
+
+            PLAYERS.push(player);
         }
 
-        for(var i = 0; i< $scope.PLAYERS.length; i++){
-            $scope.PLAYERS[i].position.x = Math.random()*1000;
-            $scope.PLAYERS[i].position.y = Math.random()*1000;        
+        if(SHADOW_ON){
+            for(var i = 0; i< SHADOWS.length; i++){
+                SHADOWS[i].position = PLAYERS[i].position;
+
+                camera.addChild(SHADOWS[i]);
+            }
         }
 
-        // kick off the animation loop (defined below)
-        $scope.animate();
+        for(var i = 0; i< PLAYERS.length; i++){
+            PLAYERS[i].position.x = 0;
+            PLAYERS[i].position.y = 0;
+
+            camera.addChild(PLAYERS[i]);
+        }
+
+        camera.addChild(mapfg);
+        animate();
     };
-    $scope.startload = function(){
-        // 04b03
+    var startload = function(){
         PIXI.loader.add('minidota', 'res/minidota.png')
                    .add('jugg', 'res/jugg.png')
-                   .add('holder', 'res/holder.png')
                    .add('map', 'res/map.png')
-                   .add('mapbg', 'res/mapbg.png')
                    .add('mapfg', 'res/mapfg.png')
-                   .add('mini', 'res/mini.png')
+                   .add('holder', 'res/holder.png')
+                   .add('chibi', 'res/chibi.json')
+                   //.add('holder', 'res/holder.png')
                    //.add('font', 'res/04B_03__.fnt')
-        .load($scope.doneload);
+        .load(doneload);
     };
-    $scope.init = function () {
-        $scope.startload();
+    var init = function () {
+        startload();
 
-        $scope.width = window.innerWidth;
-        $scope.height = $scope.width / 2;
-        $scope.graphics = new PIXI.Graphics();
-        $scope.renderer = new PIXI.autoDetectRenderer($scope.width, $scope.height);
-        $scope.renderer.backgroundColor = 0x283593;
-        $scope.renderer.view.style.left = ((window.innerWidth - $scope.renderer.width) >> 1) + 'px';
-        $scope.renderer.view.style.display = "block";
-        $scope.renderer.autoResize = true;
-        $('#canvas_holder').append($scope.renderer.view);
-        $scope.stage = new PIXI.Container();
-        $scope.camera = new PIXI.Container();
+        width = window.innerWidth;
+        $scope.height = width / 2;
+        graphics = new PIXI.Graphics();
+        renderer = new PIXI.autoDetectRenderer(width, $scope.height);
+        renderer.backgroundColor = 0x283593;
+        renderer.view.style.left = ((window.innerWidth - renderer.width) >> 1) + 'px';
+        renderer.view.style.display = "block";
+        renderer.autoResize = true;
+        $('#canvas_holder').append(renderer.view);
+        stage = new PIXI.Container();
+        camera = new PIXI.Container();
         // init camera to center, it shouldn't ever move
-        $scope.camera.scale.x = 1;
-        $scope.camera.scale.y = 1;
-        $scope.camera.position.x = 0;
-        $scope.camera.position.y = 0;
+        camera.scale.x = 1;
+        camera.scale.y = 1;
+        camera.position.x = 0;
+        camera.position.y = 0;
         
-        $scope.stage.addChild($scope.camera);
+        stage.addChild(camera);
 
         $scope.resize();
         window.onresize = $scope.resize;
     };
     $scope.resize = function (event){
         $scope.actwidth = window.innerWidth;
-        $scope.width = Math.min(window.innerWidth, (window.innerHeight-200)*2);
-        $scope.height = $scope.width / 2;
+        width = Math.min(window.innerWidth, (window.innerHeight-chat_size)*2);
+        $scope.height = width / 2;
 
-        $scope.renderer.view.style.width = $scope.width + "px";
-        $scope.renderer.view.style.height = $scope.height + "px";
-        $scope.camera.scale.x = $scope.width/1024;
-        $scope.camera.scale.y = $scope.width/1024;
+        renderer.view.style.width = width + "px";
+        renderer.view.style.height = $scope.height + "px";
+        camera.scale.x = width/1024;
+        camera.scale.y = width/1024;
 
-        $scope.renderer.resize($scope.width,$scope.height);
+        renderer.resize(width, $scope.height);
     };
-    $scope.init();
+    init();
     function rgbToHex(r, g, b) {
         return ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
-    socket.on('gameEvent',function(data){
-        var n = data.length;
-        if(PLAYERS.length < n){
-            n = PLAYERS.length;
-        }
-        for(var i = 0 ; i < n; i++){
-            PLAYERS[i].position.x = data[i].x;
-            PLAYERS[i].position.y = -data[i].y;
-            PLAYERS[i].getChildAt(1).rotation = data[i].ang;
-            PLAYERS[i].getChildAt(0).text = data[i].name;
-            PLAYERS[i].getChildAt(0).position.x = -data[i].name.length*8;
-            PLAYERS[i].getChildAt(1).tint = getColor(data[i].name);
-            console.log(data[i].name);
-        }
-    });
     socket.on('play registered',function(data){
-        console.log("action");
+        console.log(data);
         if(data == true){
             $scope.play_text = "Wait";
         }else{
@@ -146,12 +155,31 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
     socket.on('play start',function(data){
         console.log("action");
         $scope.play_text = "Found";
-        alert("play started " + data);
     });
     socket.on('game over',function(data){
         console.log("action");
         $scope.play_text = "Play";
         $scope.play_disabled = false;
-        alert("game over " + data);
+        alert(data);
+    });
+    socket.on('game event',function(data){
+        $scope.play_text = "On";
+        var n = data.length;
+        if(PLAYERS.length < n){
+            n = PLAYERS.length;
+        }
+        for(var i = 0 ; i < n; i++){
+            PLAYERS[i].texture = heroes[data[i].name];
+            PLAYERS[i].position.x = data[i].x + START_X;
+            PLAYERS[i].position.y = -data[i].y + START_Y;
+            PLAYERS[i].rotation = data[i].ang;
+
+            if(SHADOW_ON){
+                SHADOWS[i].texture = heroes[data[i].name];
+                SHADOWS[i].position.x = data[i].x + START_X;
+                SHADOWS[i].position.y = -data[i].y + START_Y;
+                SHADOWS[i].rotation = data[i].ang + 1;
+            }
+        }
     });
 }]);

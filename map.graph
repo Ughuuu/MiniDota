@@ -1,9 +1,24 @@
-5
-base 0 0 3
-fountain 1 1 2
-mid 5 5 1
-river 5 6 0
-tier1 3 4 3
-tier1 base fountain
-base mid
-base river
+fountain_base 0 0 2
+fountain_extreme 20 20 2
+base 40 40 2
+mid_spawn 60 60 2
+mid_tier3 70 70 2
+mid_tier31 90 90 1
+mid_tier2 105 105 1
+mid_tier21 125 130 1
+mid_tier22 145 140 1
+mid_tier1 165 160 1
+mid_river0 190 180 0
+mid_tier1d 220 200 1
+fountain_dire 300 300 2
+top_spawn 15 80 2
+top_tier3 15 100 2
+bot_spawn 80 15 2
+bot_tier3 100 15 2
+fountain_base fountain_extreme base mid_spawn mid_tier3 mid_tier2
+fountain_extreme top_spawn top_tier3
+fountain_extreme bot_spawn bot_tier3
+top_spawn base bot_spawn
+top_spawn mid_spawn bot_spawn
+top_tier3 base bot_tier3
+top_tier3 mid_tier3 bot_tier3
