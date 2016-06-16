@@ -7,18 +7,21 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
     $scope.height = 524;
     var refwidth = 1024;
     var refheight = 524;
+    var MAP;
     var MAX_PLAYERS = 201;
-    var START_X = 311;
-    var START_Y = 470;
+    var START_X = 290;
+    var START_Y = 490;
     var PLAYERS = [];
     var SHADOWS = [];
-    var SHADOW_ON = true;
+    var SHADOW_ON = false;
     var res;
+    var scale = 1;
     var chat_size = 100;
     $scope.actwidth = 1024;
     $scope.play_disabled = false;
     $scope.play_text = "Play";
     var heroes;
+    var selected = undefined;
     $scope.play = function(){
         socket.emit('play request', true);
         $scope.play_disabled = true;
@@ -28,20 +31,43 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
         renderer.render(stage);
         requestAnimationFrame(animate);
     };
+    var select = function(mouseData){
+        var pos = mouseData.data.getLocalPosition(MAP);
+        var input = {id: selected.id, x: pos.x, y: pos.y};
+        input.x-=12;
+        input.y-=967;
+        input.y*=-1;
+        socket.emit("play input", input);
+    }
+    var mouseClick = function(mouseData){
+        if(selected != undefined){
+            select(mouseData);
+            selected.tint = 0xFFFFFF;
+            selected = undefined;
+        }else if(this.id!=-1){            
+            selected = this;
+            selected.tint = 0x667777;
+        }
+    };
     var doneload = function (loader, resources) {
         res = resources;
-        var map = new PIXI.Sprite(res.map.texture);
+        MAP = new PIXI.Sprite(res.map.texture);
         var mapfg = new PIXI.Sprite(res.mapfg.texture);
-        map.scale.x = refheight/1120;
-        map.scale.y = refheight/1120;
-        map.position.x = refwidth/2-map.width/2+7;
-        map.position.y = 48;
+        MAP.interactive = true;
+        MAP.mouseup = mouseClick;
+        scale = refheight/1120;
+        MAP.scale.x = scale;
+        MAP.scale.y = scale;
+        MAP.position.x = refwidth/2-MAP.width/2+7;
+        MAP.position.y = 48;
         mapfg.scale.x = refheight/524;
         mapfg.scale.y = refheight/524;
-        camera.addChild(map);
+        camera.addChild(MAP);
         heroes = res.chibi.textures;
         for (var i = 0; i < MAX_PLAYERS; i++) {
             var player = new PIXI.Sprite(heroes["creep_dire"]);
+            player.interactive = true;
+            player.mouseup = mouseClick;
 
             player.anchor.x = 0.5;
             player.anchor.y = 0.5;
@@ -97,6 +123,8 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
     var init = function () {
         startload();
 
+        PIXI.Sprite.prototype.id = -1;
+
         width = window.innerWidth;
         $scope.height = width / 2;
         graphics = new PIXI.Graphics();
@@ -106,7 +134,8 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
         renderer.view.style.display = "block";
         renderer.autoResize = true;
         $('#canvas_holder').append(renderer.view);
-        stage = new PIXI.Container();
+        $('')
+        stage = new PIXI.Stage(0x66FF99, true);
         camera = new PIXI.Container();
         // init camera to center, it shouldn't ever move
         camera.scale.x = 1;
@@ -136,7 +165,6 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
         return ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
     socket.on('play registered',function(data){
-        console.log(data);
         if(data == true){
             $scope.play_text = "Wait";
         }else{
@@ -153,14 +181,11 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
         }
     });
     socket.on('play start',function(data){
-        console.log("action");
         $scope.play_text = "Found";
     });
     socket.on('game over',function(data){
-        console.log("action");
         $scope.play_text = "Play";
         $scope.play_disabled = false;
-        alert(data);
     });
     socket.on('game event',function(data){
         $scope.play_text = "On";
@@ -169,9 +194,10 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
             n = PLAYERS.length;
         }
         for(var i = 0 ; i < n; i++){
+            PLAYERS[i].id = data[i].id;
             PLAYERS[i].texture = heroes[data[i].name];
-            PLAYERS[i].position.x = data[i].x + START_X;
-            PLAYERS[i].position.y = -data[i].y + START_Y;
+            PLAYERS[i].position.x = data[i].x*scale + START_X;
+            PLAYERS[i].position.y = -data[i].y*scale + START_Y;
             PLAYERS[i].rotation = data[i].ang;
 
             if(SHADOW_ON){

@@ -13,6 +13,7 @@ app.get('/', function(req, res){
 	res.sendFile(__dirname + '/html/index.html');
 });
 
+var DEBUG = true;
 var PORT = 3000;
 var SOCKET_LIST = {};
 var PLAYER_LIST = {};
@@ -59,14 +60,28 @@ io.on('connection', function(socket){
 
     socket.on('play input', function(input){
         var id2 = PLAYER_MATCH[socket.id];
+        if(input.x<0){
+            input.x = 0;
+        }else
+        if(input.x> 1000){
+            input.x = 1000;
+        }
+        if(input.y<0){
+            input.y = 0;
+        }else
+        if(input.y> 920){
+            input.y = 920;
+        }
         if(id2 != undefined){
             var game = GAME_LIST[socket.id + "" + id2];
             if(game.player1_id == socket.id){
                 game.input1 = input;
-            }else{                
+            }else{
                 game.input2 = input;
             }
         }
+        console.log(TEST_DATA['test_game'].creeps1[input.id].pos());
+        console.log(input);
     });
 
 	socket.on('disconnect',function(){
@@ -154,17 +169,18 @@ function findGames(){
     }
 }
 
-function spawnCreeps(game){
+function spawnCreeps(game, faction){
     for(var i = 0; i<4;i++){
-        game.creeps1.push(Creep(0, "creep_radiant", "top_spawn", "top_tier3", i*3));
-        game.creeps1.push(Creep(0, "creep_radiant", "mid_spawn", "mid_tier3", i*3));
-        game.creeps1.push(Creep(0, "creep_radiant", "bot_spawn", "bot_tier3", i*3));
+        game.addCreep(Creep("creep_radiant", "top_spawn", "top_tier3", i*3), faction);
+        game.addCreep(Creep("creep_radiant", "mid_spawn", "mid_tier3", i*3), faction);
+        game.addCreep(Creep("creep_radiant", "bot_spawn", "bot_tier3", i*3), faction);
     }
+        game.addCreep(Creep("abaddon", "fountain_base", "fountain_base", 0), faction);
 }
 
 function testCreeps(game){
     for (var i in MAP) {
-        game.creeps1.push(Creep(0, "creep_radiant", i, i, 0));
+        game.addCreep(Creep("creep_radiant", i, i, 0), "radiant");
     }
 }
 
@@ -178,9 +194,9 @@ function makeGame(id1, id2){
     // javascript will send the reference here
     GAME_LIST[id2 + "" + id1] = game;
 
-    //spawnCreeps(GAME_LIST[id1 + "" + id2]);
+    spawnCreeps(GAME_LIST[id1 + "" + id2], "radiant");
 
-    testCreeps(GAME_LIST[id1 + "" + id2]);
+    //testCreeps(GAME_LIST[id1 + "" + id2]);
 }
 
 function gameOver(id1, id2, winner){    
@@ -220,13 +236,13 @@ function computeGame(creeps1, creeps2){
         var creep = creeps1[i];
         var pos = creep.pos();
 
-        gameData.push({x: pos.x, y: pos.y, name: creep.name, ang: 0});
+        gameData.push({x: pos.x, y: pos.y, name: creep.name, ang: 0, id:creep.id});
     }
     for(var i in creeps2){
         var creep = creeps2[i];
         var pos = creep.pos();
 
-        gameData.push({x: pos.x, y: pos.y, name: creep.name, ang: 0});
+        gameData.push({x: pos.x, y: pos.y, name: creep.name, ang: 0, id:creep.id});
     }
     return gameData;
 }
@@ -250,8 +266,9 @@ function updatePlayers(){
         sendGame(computeGame(GAME_LIST[i].creeps2, GAME_LIST[i].creeps1), GAME_LIST[i].player2_id);
     }
 
+    if(DEBUG)
     for (var i in SOCKET_LIST){
-        //sendGame(computeGame(TEST_DATA["test_game"].creeps1, TEST_DATA["test_game"].creeps2), i);
+        sendGame(computeGame(TEST_DATA["test_game"].creeps1, TEST_DATA["test_game"].creeps2), i);
     }
 }
 
@@ -279,15 +296,16 @@ function distance(node1, node2){
     return DISTANCES[node1.id+""+node2.id];
 }
 
-var Creep = function(id, name, node, next, dist){
+var Creep = function(name, node, next, dist){
     var self = {
-        id : id,
+        id : -1,
         name: name,
         hp: 100,
         node: node, // current node
         next: next, // next node
         dist: dist, // distance from current to next node
         buffs: {}, // map
+        path: [],
         ms: 1.5,
         pos : function(){
             var dir = distance(MAP[this.node], MAP[this.next]);
@@ -300,11 +318,11 @@ var Creep = function(id, name, node, next, dist){
                 this.dist -= dir.len;
                 var aux = this.node;
                 this.node = this.next;
-                var nextNeigh = Math.floor(Math.random() * (MAP[this.next].neighbours.length));
-                this.next = MAP[this.next].neighbours[nextNeigh];
-                // go back
-                if(this.next == undefined){
-                    this.next = aux;
+                if(this.path.length>0){// move forward
+                    this.next = this.path[0];
+                    this.path.splice(0, 1);
+                }else{// stay in place
+                    this.next = this.node;
                 }
             }
         }
@@ -365,8 +383,18 @@ var Game = function(player1_id, player2_id){
         player2_id: player2_id,
         input1 : undefined,
         input2 : undefined,
-        creeps1 : [],
-        creeps2 : [],
+        creeps1 : {},
+        creeps2 : {},
+        creep_id: 0,
+        addCreep: function(creep, faction){
+            creep.id = this.creep_id;
+            this.creep_id++;
+            if(faction == "radiant"){
+                this.creeps1[creep.id]=creep;
+            }else if(faction == "dire"){
+                this.creeps2[creep.id]=creep;
+            }
+        }
     };
     return self;
 };
@@ -375,6 +403,8 @@ http.listen(PORT, function(){
     console.log('listening on port: ' + PORT);
     createMap();
 
-    TEST_DATA["test_game"] = Game(0,0);
-    testCreeps(TEST_DATA["test_game"]);
+    if(DEBUG){
+        TEST_DATA["test_game"] = Game(0,0);
+        testCreeps(TEST_DATA["test_game"]);
+    }
 });

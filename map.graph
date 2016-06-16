@@ -15,6 +15,7 @@ top_spawn 15 80 2
 top_tier3 15 100 2
 bot_spawn 80 15 2
 bot_tier3 100 15 2
+point 928 841 2
 fountain_base fountain_extreme base mid_spawn mid_tier3 mid_tier2
 fountain_extreme top_spawn top_tier3
 fountain_extreme bot_spawn bot_tier3
