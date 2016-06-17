@@ -14,7 +14,7 @@ app.get('/', function(req, res){
 });
 
 var DEBUG = true;
-var PORT = 3000;
+var PORT = 3000 || process.env.PORT;
 var SOCKET_LIST = {};
 var PLAYER_LIST = {};
 var NEW_PLAYER_LIST = new Set();
@@ -173,7 +173,7 @@ function findGames(){
 }
 
 function spawnCreeps(game, faction){
-    for(var i = 0; i<75;i++){
+    for(var i = 0; i<1;i++){
         game.addCreep(Creep("creep_radiant", "35", "36", i*3), faction);
         game.addCreep(Creep("creep_dire", "35", "36", i*3), faction);
         game.addCreep(Creep("creep_radiant", "35", "36", i*3), faction);
@@ -382,7 +382,7 @@ var Creep = function(name, node, next, dist){
         dist: dist, // distance from current to next node
         buffs: {}, // map
         path: [],
-        ms: 8,
+        ms: 4,
         pos : function(){
             var dir = distance(MAP[this.node], MAP[this.next]);
             var h = MAP[this.node].height;
