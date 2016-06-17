@@ -25,8 +25,12 @@ var GLOBAL_PLAYER_ID = 0;
 var PLAYERS = 0;
 var timeStep = 1000 / 30.0;
 var MAP = {};
+var SUBDIVISIONS = 20;
+var GRID = [];
 var DISTANCES = {};
 var TEST_DATA = {};
+var VISITED_INDEX =1;
+var PATH = {};
 
 io.on('connection', function(socket){
 	socket.id = GLOBAL_PLAYER_ID + 1;
@@ -80,8 +84,7 @@ io.on('connection', function(socket){
                 game.input2 = input;
             }
         }
-        console.log(TEST_DATA['test_game'].creeps1[input.id].pos());
-        console.log(input);
+        TEST_DATA['test_game'].input1 = input;
     });
 
 	socket.on('disconnect',function(){
@@ -170,7 +173,7 @@ function findGames(){
 }
 
 function spawnCreeps(game, faction){
-    for(var i = 0; i<200;i++){
+    for(var i = 0; i<75;i++){
         game.addCreep(Creep("creep_radiant", "35", "36", i*3), faction);
         game.addCreep(Creep("creep_dire", "35", "36", i*3), faction);
         game.addCreep(Creep("creep_radiant", "35", "36", i*3), faction);
@@ -211,8 +214,79 @@ function gameOver(id1, id2, winner){
     delete GAME_LIST[id2 + "" + id1];
 }
 
+function findNode(input){
+    var dist = 99999999999;
+    var pos = {x: input.x, y: input.y};
+    var node_name;
+    for(var i in MAP){
+        var pos2 = {x:MAP[i].x, y:MAP[i].y};
+        var dist2 = (pos.x-pos2.x)*(pos.x-pos2.x) + (pos.y-pos2.y)*(pos.y-pos2.y);
+        if(dist2 < dist){
+            dist = dist2;
+            node_name = i;
+        }
+    }
+    return node_name;
+}
+
+function findPath(node1, node2){
+    if(PATH[node1 + "," + node2] == undefined){
+        var queue = [node1];
+        var path = [];
+        MAP[node1].walk = 0;
+        while(queue.length!=0){
+            var node = queue.shift();
+            MAP[node].visited = VISITED_INDEX;
+            for(var j in MAP[node].neighbours){
+                var neigh = MAP[node].neighbours[j];
+                if(MAP[neigh].visited != VISITED_INDEX){
+
+                    MAP[neigh].visited = VISITED_INDEX;
+                    MAP[neigh].walk = MAP[node].walk + distance(MAP[node], MAP[neigh]).len;
+
+
+                    queue.push(neigh);
+                }else{
+                    MAP[neigh].walk = Math.min(MAP[neigh].walk, MAP[node].walk + distance(MAP[node], MAP[neigh]).len);
+
+                }
+            }
+        }
+
+        var node = MAP[node2];
+
+        while(node.id != node1){
+            var minVal = node.walk;
+            var node2;
+            for(var j in node.neighbours){
+                var neigh = node.neighbours[j];
+                if(MAP[neigh].walk < minVal){
+                    node2 = MAP[neigh];
+                    minVal = MAP[neigh].walk;
+                }
+            }
+            path.push(node2.id);
+            node = node2;
+        }
+
+        PATH[node1 + "," + node2] = path.reverse();
+        //PATH[node1 + "," + node2] = path.slice();
+        //PATH[node1 + "," + node2].reverse();
+    }
+    return PATH[node1 + "," + node2];
+}
+
 function updateGame(game){    
         //process inputs, update creeps
+        VISITED_INDEX++;
+        if(game.input1 != undefined){
+            var creep = game.creeps1[game.input1.id];
+
+            var node_name = findNode(game.input1);
+
+            
+            creep.path = findPath(creep.next, node_name);
+        }
 
         game.input1 = undefined;
         game.input2 = undefined;
@@ -233,13 +307,13 @@ function computeGame(creeps1, creeps2){
         var creep = creeps1[i];
         var pos = creep.pos();
 
-        gameData.push({x: pos.x, y: pos.y, name: creep.name, ang: 0, id:creep.id});
+        gameData.push({x: pos.x, y: pos.y, name: creep.name, ang: 0, id:creep.id, h: pos.h});
     }
     for(var i in creeps2){
         var creep = creeps2[i];
         var pos = creep.pos();
 
-        gameData.push({x: pos.x, y: pos.y, name: creep.name, ang: 0, id:creep.id});
+        gameData.push({x: pos.x, y: pos.y, name: creep.name, ang: 0, id:creep.id, h: pos.h});
     }
     return gameData;
 }
@@ -308,30 +382,37 @@ var Creep = function(name, node, next, dist){
         dist: dist, // distance from current to next node
         buffs: {}, // map
         path: [],
-        ms: 10,
+        ms: 8,
         pos : function(){
             var dir = distance(MAP[this.node], MAP[this.next]);
-            return { x: (MAP[this.node].x + dir.x * this.dist), y: MAP[this.node].y + dir.y * this.dist };
+            var h = MAP[this.node].height;
+            if(MAP[this.next].height != h){
+                var proc = this.dist/dir.len, inv = 1 - proc;
+                h = h * inv + MAP[this.next].height*proc;
+            }
+            return { x: (MAP[this.node].x + dir.x * this.dist), y: MAP[this.node].y + dir.y * this.dist, h: h };
         },
         move: function(){
             var dir = distance(MAP[this.node], MAP[this.next]);
             this.dist+=this.ms;
             if(this.dist>dir.len){
                 this.dist -= dir.len;
-                var aux = this.node;
                 this.node = this.next;
                 if(this.path.length>0){// move forward
                     this.next = this.path[0];
                     this.path.splice(0, 1);
                 }else{// stay in place
-                    //this.next = this.node;
-                    var nr = ~~(MAP[this.node].neighbours.length * (Math.random()-0.01));
-                    if(MAP[this.node].neighbours.length <= nr)
-                        nr = MAP[this.node].neighbours.length-1;
-                    //console.log(MAP[this.node].neighbours.length + " " + nr);
-                    this.next = MAP[this.node].neighbours[nr];
-                    if(this.next == undefined || MAP[this.next] == undefined){
+                    if(DEBUG){
                         this.next = this.node;
+                        var nr = ~~(MAP[this.node].neighbours.length * (Math.random()-0.01));
+                        if(MAP[this.node].neighbours.length <= nr)
+                            nr = MAP[this.node].neighbours.length;
+                        this.next = MAP[this.node].neighbours[nr];
+                        if(this.next == undefined || MAP[this.next] == undefined){
+                            this.next = this.node;
+                        }
+                    }else{                        
+                        this.dist = 0;
                     }
                 }
             }
@@ -340,16 +421,18 @@ var Creep = function(name, node, next, dist){
     return self;
 };
 
-var Node = function(x, y, height, id) {
+var Node = function(x, y, height, id, neighbours) {
     var self = {
         id: id,
-        neighbours: [],
+        neighbours: neighbours,
         x: x,
         y: y,
         height: height,
         addNeigh: function(name) {
             this.neighbours.push(name);
-        }
+        },
+        visited: 0,
+        walk: 0,
     };
     return self;
 };
@@ -382,10 +465,16 @@ var loadMap = function() {
     var fs = require('fs');
     MAP = JSON.parse(fs.readFileSync('map1.graph'));
     for(var i in MAP){
-        for(var j in MAP[i].neighbours){
-            if(MAP[MAP[i].neighbours[j]] == undefined){
-                MAP[i].neighbours.splice(j,1);
-                j--;
+        MAP[i] = new Node(MAP[i].x, MAP[i].y, MAP[i].height, MAP[i].id, MAP[i].neighbours);
+        var ok = false;
+        while(ok == false){
+            ok = true;
+            for(var j in MAP[i].neighbours){
+                if(MAP[MAP[i].neighbours[j]] == undefined){
+                    MAP[i].neighbours.splice(j,1);
+                    j--;
+                    ok = false;
+                }
             }
         }
     }
@@ -393,7 +482,7 @@ var loadMap = function() {
 
 var Input = function(heroid, x, y){
     var self = {
-        heroid : heroid,
+        id : id,
         x : x,
         y : y,
     };
