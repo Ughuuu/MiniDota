@@ -1,5 +1,4 @@
 app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
-    var graphics;
     var renderer;
     var stage;
     var camera;
@@ -8,50 +7,59 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
     var refwidth = 1024;
     var refheight = 524;
     var MAP;
-    var MAX_PLAYERS = 201;
+    var MAX_PLAYERS = 401;
     var START_X = 290;
     var START_Y = 490;
     var PLAYERS = [];
-    var SHADOWS = [];
-    var SHADOW_ON = false;
+    var LINES;
     var res;
     var scale = 1;
     var chat_size = 100;
     $scope.actwidth = 1024;
-    $scope.play_disabled = false;
-    $scope.play_text = "Play";
+    $scope.play_text = "Add";
     var heroes;
     var selected = undefined;
     $scope.play = function(){
-        socket.emit('play request', true);
-        $scope.play_disabled = true;
-        $scope.play_text = "Find";
+        if($scope.play_text == "Add")
+        $scope.play_text = "Link";
+        else
+            $scope.play_text = "Add";
     };
     var animate = function () {
         renderer.render(stage);
         requestAnimationFrame(animate);
     };
-    var select = function(mouseData){
-        var pos = mouseData.data.getLocalPosition(MAP);
-        var input = {id: selected.id, x: pos.x, y: pos.y};
-        input.x-=12;
-        input.y-=967;
-        input.y*=-1;
-        socket.emit("play input", input);
-    }
     var mouseClick = function(mouseData){
-        if(selected != undefined){
-            select(mouseData);
-            selected.tint = 0xFFFFFF;
-            selected = undefined;
-        }else if(this.id!=-1){            
-            selected = this;
-            selected.tint = 0x667777;
+        if($scope.play_text == "Add"){
+            if(this.id == -1){
+                var pos = mouseData.data.getLocalPosition(MAP);
+                var input = {x: pos.x-10, y: pos.y+20};
+                input.x-=12;
+                input.y-=967;
+                input.y*=-1;
+                socket.emit("add map", input);            
+            }else{
+                socket.emit("remove map", {id:this.id});
+            }
+        }else{
+            if(this.id == -1){         
+            }else{
+                if(selected != undefined){
+                    socket.emit("link map", 
+                        {id1: this.id, id2: selected.id});  
+                    selected.tint = 0xFFFFFF; 
+                    selected = undefined;
+                }else{
+                    selected = this;
+                    selected.tint = 0x110022;
+                }
+            }
         }
     };
     var doneload = function (loader, resources) {
         res = resources;
         MAP = new PIXI.Sprite(res.map.texture);
+        MAP.id = -1;
         var mapfg = new PIXI.Sprite(res.mapfg.texture);
         MAP.interactive = true;
         MAP.mouseup = mouseClick;
@@ -66,37 +74,17 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
         heroes = res.chibi.textures;
         for (var i = 0; i < MAX_PLAYERS; i++) {
             var player = new PIXI.Sprite(heroes["creep_dire"]);
+            player.id = -1;
             player.interactive = true;
             player.mouseup = mouseClick;
 
             player.anchor.x = 0.5;
             player.anchor.y = 0.5;
 
-            player.scale.x = 0.5;
-            player.scale.y = 0.5;
-
-            if(SHADOW_ON){
-                var shadow = new PIXI.Sprite(heroes["creep_dire"]);
-                shadow.anchor.x = 0.07;
-                shadow.anchor.y = 0.8;
-
-                shadow.scale.x = 0.5;
-                shadow.scale.y = 1;
-                shadow.rotation = 1;
-                shadow.tint = 0x000000;
-                shadow.alpha = 0.4;
-                SHADOWS.push(shadow);
-            }
+            player.scale.x = 0.2;
+            player.scale.y = 0.2;
 
             PLAYERS.push(player);
-        }
-
-        if(SHADOW_ON){
-            for(var i = 0; i< SHADOWS.length; i++){
-                SHADOWS[i].position = PLAYERS[i].position;
-
-                camera.addChild(SHADOWS[i]);
-            }
         }
 
         for(var i = 0; i< PLAYERS.length; i++){
@@ -127,7 +115,6 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
 
         width = window.innerWidth;
         $scope.height = width / 2;
-        graphics = new PIXI.Graphics();
         renderer = new PIXI.autoDetectRenderer(width, $scope.height);
         renderer.backgroundColor = 0x283593;
         renderer.view.style.left = ((window.innerWidth - renderer.width) >> 1) + 'px';
@@ -135,8 +122,9 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
         renderer.autoResize = true;
         $('#canvas_holder').append(renderer.view);
         $('')
-        stage = new PIXI.Stage(0x66FF99, true);
+        stage = new PIXI.Container();
         camera = new PIXI.Container();
+        LINES = new PIXI.Graphics();
         // init camera to center, it shouldn't ever move
         camera.scale.x = 1;
         camera.scale.y = 1;
@@ -164,31 +152,7 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
     function rgbToHex(r, g, b) {
         return ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
-    socket.on('play registered',function(data){
-        if(data == true){
-            $scope.play_text = "Wait";
-        }else{
-            $scope.play_text = "Error";
-            $mdToast.show(
-              $mdToast.simple()
-                .textContent('Name is required!')
-                .position("bottom right")
-                .hideDelay(3000)
-            ).then(function(response){
-                $scope.play_text = "Play";
-                $scope.play_disabled = false;
-            });
-        }
-    });
-    socket.on('play start',function(data){
-        $scope.play_text = "Found";
-    });
-    socket.on('game over',function(data){
-        $scope.play_text = "Play";
-        $scope.play_disabled = false;
-    });
     socket.on('game event',function(data){
-        $scope.play_text = "On";
         var n = data.length;
         if(PLAYERS.length < n){
             n = PLAYERS.length;
@@ -199,13 +163,31 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
             PLAYERS[i].position.x = data[i].x*scale + START_X;
             PLAYERS[i].position.y = -data[i].y*scale + START_Y;
             PLAYERS[i].rotation = data[i].ang;
-
-            if(SHADOW_ON){
-                SHADOWS[i].texture = heroes[data[i].name];
-                SHADOWS[i].position.x = data[i].x + START_X;
-                SHADOWS[i].position.y = -data[i].y + START_Y;
-                SHADOWS[i].rotation = data[i].ang + 1;
-            }
         }
+        for(var i = n ; i < PLAYERS.length; i++){
+            PLAYERS[i].id = -1;
+            PLAYERS[i].texture = heroes["abaddon"];
+            PLAYERS[i].position.x = 0;
+            PLAYERS[i].position.y = 0;
+            PLAYERS[i].rotation = 0;
+        }
+    });
+    socket.on('whole map',function(map){
+        camera.removeChild(LINES);
+        LINES = new PIXI.Graphics();
+        LINES.beginFill(0x00FF00);
+        LINES.lineStyle(2, 0xAAAAAA);
+        for(var i in map){
+            for(var j in map[i].neighbours){
+                var id = map[i].neighbours[j];
+                if(map[id] == undefined){
+                    continue;
+                }
+                LINES.moveTo(map[i].x*scale + START_X, -map[i].y*scale + START_Y);                
+                LINES.lineTo(map[id].x*scale + START_X, -map[id].y*scale + START_Y);
+            }            
+        }
+        LINES.endFill();
+        camera.addChild(LINES);
     });
 }]);

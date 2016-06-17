@@ -27,6 +27,7 @@ var timeStep = 1000 / 30.0;
 var MAP = {};
 var DISTANCES = {};
 var TEST_DATA = {};
+var node_id = 35;
 
 io.on('connection', function(socket){
 	socket.id = GLOBAL_PLAYER_ID + 1;
@@ -80,8 +81,35 @@ io.on('connection', function(socket){
                 game.input2 = input;
             }
         }
-        console.log(TEST_DATA['test_game'].creeps1[input.id].pos());
+    });
+
+    socket.on('add map', function(input){
+        if(input.x<0 || input.x> 1000 || input.y<0 || input.y> 920){
+            return;
+        }
+        var name = node_id;
+        node_id++;
+        MAP[name]=Node(~~input.x, ~~input.y, 0, name);
+        testCreeps(TEST_DATA["test_game"]);
+        saveMap();
+    });
+
+    socket.on('link map', function(input){
         console.log(input);
+        MAP[input.id1].neighbours.push(input.id2);
+        MAP[input.id2].neighbours.push(input.id1);
+        testCreeps(TEST_DATA["test_game"]);
+        saveMap();
+    });
+
+    socket.on('remove map', function(input){
+        if(input.x<0 || input.x> 1000 || input.y<0 || input.y> 920){
+            return;
+        }
+        console.log(input);
+        delete MAP[input.id];
+        testCreeps(TEST_DATA["test_game"]);
+        saveMap();
     });
 
 	socket.on('disconnect',function(){
@@ -179,8 +207,12 @@ function spawnCreeps(game, faction){
 }
 
 function testCreeps(game){
+    game.creeps1 = {};
+    game.creeps2 = {};
     for (var i in MAP) {
-        game.addCreep(Creep("creep_radiant", i, i, 0), "radiant");
+        var creep = Creep("io", i, i, 0);
+        game.addCreep(creep, "radiant");
+        creep.id = i;
     }
 }
 
@@ -269,6 +301,7 @@ function updatePlayers(){
     if(DEBUG)
     for (var i in SOCKET_LIST){
         sendGame(computeGame(TEST_DATA["test_game"].creeps1, TEST_DATA["test_game"].creeps2), i);
+        SOCKET_LIST[i].emit('whole map', MAP);
     }
 }
 
@@ -368,6 +401,22 @@ var createMap = function() {
     }
 };
 
+var loadMap = function() {
+    var fs = require('fs');
+    MAP = JSON.parse(fs.readFileSync('map1.graph'));
+    for(var i in MAP){
+        if( node_id < ~~i + 1){
+            node_id = ~~i + 1;
+        }
+    }
+};
+
+var saveMap = function() {
+    var fs = require('fs');
+    fs.writeFileSync('map1.graph', JSON.stringify(MAP));
+    loadMap();
+};
+
 var Input = function(heroid, x, y){
     var self = {
         heroid : heroid,
@@ -401,7 +450,7 @@ var Game = function(player1_id, player2_id){
 
 http.listen(PORT, function(){
     console.log('listening on port: ' + PORT);
-    createMap();
+    loadMap();
 
     if(DEBUG){
         TEST_DATA["test_game"] = Game(0,0);
