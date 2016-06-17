@@ -2,13 +2,20 @@
   "name": "minidota",
   "version": "1.0.0",
   "description": "Later\r I like bears",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Ughuuu/MiniDota.git"
+  },  
+  "dependencies":{
+    "express": "^4.13.4",
+    "socket.io": "^1.4.5"
+  },
+  "engines": {
+    "node": "4.1.x"
   },
   "author": "",
   "license": "ISC",
