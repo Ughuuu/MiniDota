@@ -10,11 +10,11 @@ app.use(express.static(__dirname + '/'));
 app.use(favicon(__dirname + '/res/jugg.png'));
 
 app.get('/', function(req, res){
-	res.sendFile(__dirname + '/html/index.html');
+    res.sendFile(__dirname + '/html/index.html');
 });
 
 var DEBUG = true;
-var PORT = 3000 || process.env.PORT;
+var PORT = (process.env.PORT || 5000);
 var SOCKET_LIST = {};
 var PLAYER_LIST = {};
 var NEW_PLAYER_LIST = new Set();
@@ -33,15 +33,15 @@ var VISITED_INDEX =1;
 var PATH = {};
 
 io.on('connection', function(socket){
-	socket.id = GLOBAL_PLAYER_ID + 1;
+    socket.id = GLOBAL_PLAYER_ID + 1;
     GLOBAL_PLAYER_ID++;
-	SOCKET_LIST[socket.id] = socket;
+    SOCKET_LIST[socket.id] = socket;
 
-	socket.on('make player',function(name){
-    	if(PLAYER_LIST[socket.id] != undefined)
-    		return;
-		PLAYERS++;
-	 	NEW_PLAYER_LIST.add({id:socket.id, name:name.name});
+    socket.on('make player',function(name){
+        if(PLAYER_LIST[socket.id] != undefined)
+            return;
+        PLAYERS++;
+        NEW_PLAYER_LIST.add({id:socket.id, name:name.name});
     });
 
     socket.on('play request', function(input){
@@ -55,12 +55,12 @@ io.on('connection', function(socket){
         }      
     });
 
-	socket.on('chat message', function(msg){
-		var player = new Object();
-		player.name = PLAYER_LIST[socket.id].name;
-		player.msg = msg;
-	  	io.emit('chat message', player);
-	});
+    socket.on('chat message', function(msg){
+        var player = new Object();
+        player.name = PLAYER_LIST[socket.id].name;
+        player.msg = msg;
+        io.emit('chat message', player);
+    });
 
     socket.on('play input', function(input){
         var id2 = PLAYER_MATCH[socket.id];
@@ -87,48 +87,48 @@ io.on('connection', function(socket){
         TEST_DATA['test_game'].input1 = input;
     });
 
-	socket.on('disconnect',function(){
-	    delete SOCKET_LIST[socket.id];
-    	if(PLAYER_LIST[socket.id] == undefined)
-    		return;
-    	PLAYER_LIST[socket.id].destroy = true;
-		PLAYERS--;
+    socket.on('disconnect',function(){
+        delete SOCKET_LIST[socket.id];
+        if(PLAYER_LIST[socket.id] == undefined)
+            return;
+        PLAYER_LIST[socket.id].destroy = true;
+        PLAYERS--;
     });
 });
 
 function connectNewPlayers(){
-	for (let obj of NEW_PLAYER_LIST) {
-		var id = obj.id;
-		var name = obj.name;
-		if(PLAYER_LIST[id] != undefined){
-			continue;
-		}
-	    var player = Player(id, name);
-	    PLAYER_LIST[id] = player;
-	}
-	if (NEW_PLAYER_LIST.size) {
-		sendChat(computeChat());
-		NEW_PLAYER_LIST.clear();
-	}
+    for (let obj of NEW_PLAYER_LIST) {
+        var id = obj.id;
+        var name = obj.name;
+        if(PLAYER_LIST[id] != undefined){
+            continue;
+        }
+        var player = Player(id, name);
+        PLAYER_LIST[id] = player;
+    }
+    if (NEW_PLAYER_LIST.size) {
+        sendChat(computeChat());
+        NEW_PLAYER_LIST.clear();
+    }
 }
 
-function removeDisconnected(){	
+function removeDisconnected(){  
     for(var i in PLAYER_LIST){
         var player = PLAYER_LIST[i];
         if(player.destroy == true){    
-        	PLAYERS--;
+            PLAYERS--;
 
             if(PLAYER_MATCH[player.id] != undefined){
                 gameOver(player.id, PLAYER_MATCH[player.id], PLAYER_MATCH[player.id]);
             }
 
-	        delete PLAYER_LIST[player.id];
+            delete PLAYER_LIST[player.id];
         }
     }
     sendChat(computeChat());
 }
 
-function computeChat(){	
+function computeChat(){ 
     var gameData = [];
     for(var i in PLAYER_LIST){
         var player = PLAYER_LIST[i];
@@ -141,7 +141,7 @@ function computeChat(){
     return gameData;
 }
 
-function sendChat(data){	
+function sendChat(data){    
     for(var i in SOCKET_LIST){
         var socket = SOCKET_LIST[i];
         socket.emit('chat event', data);
@@ -324,9 +324,9 @@ function sendGame(data, id){
 }
 
 function updatePlayers(){
-	connectNewPlayers();
+    connectNewPlayers();
 
-	removeDisconnected();
+    removeDisconnected();
 
     findGames();
 
@@ -352,8 +352,8 @@ setInterval(updatePlayers, timeStep);
 
 var Player = function(id, name, room){
     var self = {
-    	room: room,
-    	name:name,
+        room: room,
+        name:name,
         id:id,
     }
     return self;

@@ -14,7 +14,7 @@ app.get('/', function(req, res){
 });
 
 var DEBUG = true;
-var PORT = (process.env.PORT || 3000);
+var port = 5000;//(process.env.PORT || 5000);
 var SOCKET_LIST = {};
 var PLAYER_LIST = {};
 var NEW_PLAYER_LIST = new Set();
@@ -511,8 +511,8 @@ var Game = function(player1_id, player2_id){
     return self;
 };
 
-http.listen(PORT, function(){
-    console.log('listening on port: ' + PORT);
+http.listen(port, function(){
+    console.log('listening on port: ' + port);
     loadMap();
 
     if(DEBUG){
