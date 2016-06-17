@@ -33,7 +33,7 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
     };
     var select = function(mouseData){
         var pos = mouseData.data.getLocalPosition(MAP);
-        var input = {id: selected.id, x: pos.x, y: pos.y};
+        var input = {id: selected.id, x: pos.x-10, y: pos.y+20};
         input.x-=12;
         input.y-=967;
         input.y*=-1;
@@ -79,11 +79,9 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
 
             if(SHADOW_ON){
                 var shadow = new PIXI.Sprite(heroes["creep_dire"]);
-                shadow.anchor.x = 0.07;
-                shadow.anchor.y = 0.8;
+                shadow.anchor.x = 0.5;
+                shadow.anchor.y = 0.5;
 
-                shadow.scale.x = 0.3;
-                shadow.scale.y = 0.5;
                 shadow.rotation = 1;
                 shadow.tint = 0x000000;
                 shadow.alpha = 0.4;
@@ -93,7 +91,7 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
 
         if(SHADOW_ON){
             for(var i = 0; i< SHADOWS.length; i++){
-                SHADOWS[i].position = PLAYERS[i].position;
+                SHADOWS[i].position.x = SHADOWS[i].position.x = 0;
 
                 camera.addChild(SHADOWS[i]);
             }
@@ -198,7 +196,15 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
             PLAYERS[i].texture = heroes[data[i].name];
             PLAYERS[i].position.x = data[i].x*scale + START_X;
             PLAYERS[i].position.y = -data[i].y*scale + START_Y;
+            PLAYERS[i].scale.x = PLAYERS[i].scale.y = SHADOWS[i].scale.x = SHADOWS[i].scale.y = data[i].h;
             PLAYERS[i].rotation = data[i].ang;
+
+            if(SHADOW_ON){
+                SHADOWS[i].texture = heroes[data[i].name];
+                SHADOWS[i].position.x = data[i].x + START_X;
+                SHADOWS[i].position.y = -data[i].y + START_Y;
+                SHADOWS[i].rotation = data[i].ang + 1;
+            }
         }
     });
 }]);

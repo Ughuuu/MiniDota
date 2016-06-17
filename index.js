@@ -170,7 +170,7 @@ function findGames(){
 }
 
 function spawnCreeps(game, faction){
-    for(var i = 0; i<200;i++){
+    for(var i = 0; i<1;i++){
         game.addCreep(Creep("creep_radiant", "35", "36", i*3), faction);
         game.addCreep(Creep("creep_dire", "35", "36", i*3), faction);
         game.addCreep(Creep("creep_radiant", "35", "36", i*3), faction);
