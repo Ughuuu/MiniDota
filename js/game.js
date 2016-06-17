@@ -213,7 +213,6 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
             PLAYERS[i].position.x = data[i].x*scale + START_X;
             PLAYERS[i].position.y = -data[i].y*scale + START_Y;
             PLAYERS[i].rotation = data[i].ang;
-            console.log(data[i].h);
             PLAYERS[i].scale.x = PLAYERS[i].scale.y = SHADOWS[i].scale.x = SHADOWS[i].scale.y = 0.6 - (3-data[i].h)/10;
 
             if(SHADOW_ON){

@@ -382,7 +382,7 @@ var Creep = function(name, node, next, dist){
         dist: dist, // distance from current to next node
         buffs: {}, // map
         path: [],
-        ms: 4,
+        ms: 1,
         pos : function(){
             var dir = distance(MAP[this.node], MAP[this.next]);
             var h = MAP[this.node].height;
