@@ -13,6 +13,7 @@ app.get('/', function(req, res){
     res.sendFile(__dirname + '/html/index.html');
 });
 
+var TEST = false;
 var DEBUG = true;
 var PORT = (process.env.PORT || 5000);
 var SOCKET_LIST = {};
@@ -382,7 +383,7 @@ var Creep = function(name, node, next, dist){
         dist: dist, // distance from current to next node
         buffs: {}, // map
         path: [],
-        ms: 1,
+        ms: 8,
         pos : function(){
             var dir = distance(MAP[this.node], MAP[this.next]);
             var h = MAP[this.node].height;
@@ -402,7 +403,7 @@ var Creep = function(name, node, next, dist){
                     this.next = this.path[0];
                     this.path.splice(0, 1);
                 }else{// stay in place
-                    if(DEBUG){
+                    if(DEBUG && TEST){
                         this.next = this.node;
                         var nr = ~~(MAP[this.node].neighbours.length * (Math.random()-0.01));
                         if(MAP[this.node].neighbours.length <= nr)
