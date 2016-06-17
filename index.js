@@ -170,18 +170,19 @@ function findGames(){
 }
 
 function spawnCreeps(game, faction){
-    for(var i = 0; i<4;i++){
-        game.addCreep(Creep("creep_radiant", "top_spawn", "top_tier3", i*3), faction);
-        game.addCreep(Creep("creep_radiant", "mid_spawn", "mid_tier3", i*3), faction);
-        game.addCreep(Creep("creep_radiant", "bot_spawn", "bot_tier3", i*3), faction);
+    for(var i = 0; i<200;i++){
+        game.addCreep(Creep("creep_radiant", "35", "36", i*3), faction);
+        game.addCreep(Creep("creep_dire", "35", "36", i*3), faction);
+        game.addCreep(Creep("creep_radiant", "35", "36", i*3), faction);
     }
-        game.addCreep(Creep("abaddon", "fountain_base", "fountain_base", 0), faction);
+        game.addCreep(Creep("abaddon", "36", "36", 0), faction);
 }
 
 function testCreeps(game){
-    for (var i in MAP) {
-        game.addCreep(Creep("creep_radiant", i, i, 0), "radiant");
-    }
+    spawnCreeps(game, "radiant");
+    //for (var i in MAP) {
+    //    game.addCreep(Creep("creep_radiant", i, i, 0), "radiant");
+    //}
 }
 
 function makeGame(id1, id2){
@@ -210,10 +211,7 @@ function gameOver(id1, id2, winner){
     delete GAME_LIST[id2 + "" + id1];
 }
 
-function updateGames(){
-    for(var i in GAME_LIST){
-        var game = GAME_LIST[i];
-
+function updateGame(game){    
         //process inputs, update creeps
 
         game.input1 = undefined;
@@ -226,7 +224,6 @@ function updateGames(){
         for(var i in game.creeps2){
             game.creeps2[i].move();
         }
-    }
 }
 
 function computeGame(creeps1, creeps2){ 
@@ -259,7 +256,12 @@ function updatePlayers(){
 
     findGames();
 
-    updateGames();
+    for(var i in GAME_LIST){
+        var game = GAME_LIST[i];
+        updateGame(game);
+    }
+
+    updateGame(TEST_DATA['test_game']);
 
     for (var i in GAME_LIST) {
         sendGame(computeGame(GAME_LIST[i].creeps1, GAME_LIST[i].creeps2), GAME_LIST[i].player1_id);
@@ -306,7 +308,7 @@ var Creep = function(name, node, next, dist){
         dist: dist, // distance from current to next node
         buffs: {}, // map
         path: [],
-        ms: 1.5,
+        ms: 10,
         pos : function(){
             var dir = distance(MAP[this.node], MAP[this.next]);
             return { x: (MAP[this.node].x + dir.x * this.dist), y: MAP[this.node].y + dir.y * this.dist };
@@ -322,7 +324,15 @@ var Creep = function(name, node, next, dist){
                     this.next = this.path[0];
                     this.path.splice(0, 1);
                 }else{// stay in place
-                    this.next = this.node;
+                    //this.next = this.node;
+                    var nr = ~~(MAP[this.node].neighbours.length * (Math.random()-0.01));
+                    if(MAP[this.node].neighbours.length <= nr)
+                        nr = MAP[this.node].neighbours.length-1;
+                    //console.log(MAP[this.node].neighbours.length + " " + nr);
+                    this.next = MAP[this.node].neighbours[nr];
+                    if(this.next == undefined || MAP[this.next] == undefined){
+                        this.next = this.node;
+                    }
                 }
             }
         }
@@ -368,6 +378,19 @@ var createMap = function() {
     }
 };
 
+var loadMap = function() {
+    var fs = require('fs');
+    MAP = JSON.parse(fs.readFileSync('map1.graph'));
+    for(var i in MAP){
+        for(var j in MAP[i].neighbours){
+            if(MAP[MAP[i].neighbours[j]] == undefined){
+                MAP[i].neighbours.splice(j,1);
+                j--;
+            }
+        }
+    }
+};
+
 var Input = function(heroid, x, y){
     var self = {
         heroid : heroid,
@@ -401,7 +424,7 @@ var Game = function(player1_id, player2_id){
 
 http.listen(PORT, function(){
     console.log('listening on port: ' + PORT);
-    createMap();
+    loadMap();
 
     if(DEBUG){
         TEST_DATA["test_game"] = Game(0,0);

@@ -8,12 +8,12 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
     var refwidth = 1024;
     var refheight = 524;
     var MAP;
-    var MAX_PLAYERS = 201;
+    var MAX_PLAYERS = 801;
     var START_X = 290;
     var START_Y = 490;
     var PLAYERS = [];
     var SHADOWS = [];
-    var SHADOW_ON = false;
+    var SHADOW_ON = true;
     var res;
     var scale = 1;
     var chat_size = 100;
@@ -72,23 +72,23 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
             player.anchor.x = 0.5;
             player.anchor.y = 0.5;
 
-            player.scale.x = 0.5;
-            player.scale.y = 0.5;
+            player.scale.x = 0.4;
+            player.scale.y = 0.4;
+
+            PLAYERS.push(player);
 
             if(SHADOW_ON){
                 var shadow = new PIXI.Sprite(heroes["creep_dire"]);
                 shadow.anchor.x = 0.07;
                 shadow.anchor.y = 0.8;
 
-                shadow.scale.x = 0.5;
-                shadow.scale.y = 1;
+                shadow.scale.x = 0.3;
+                shadow.scale.y = 0.5;
                 shadow.rotation = 1;
                 shadow.tint = 0x000000;
                 shadow.alpha = 0.4;
                 SHADOWS.push(shadow);
             }
-
-            PLAYERS.push(player);
         }
 
         if(SHADOW_ON){
@@ -199,13 +199,6 @@ app.controller('InGame', ['$scope', '$mdToast', function($scope, $mdToast) {
             PLAYERS[i].position.x = data[i].x*scale + START_X;
             PLAYERS[i].position.y = -data[i].y*scale + START_Y;
             PLAYERS[i].rotation = data[i].ang;
-
-            if(SHADOW_ON){
-                SHADOWS[i].texture = heroes[data[i].name];
-                SHADOWS[i].position.x = data[i].x + START_X;
-                SHADOWS[i].position.y = -data[i].y + START_Y;
-                SHADOWS[i].rotation = data[i].ang + 1;
-            }
         }
     });
 }]);
