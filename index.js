@@ -14,7 +14,7 @@ app.get('/', function(req, res){
 });
 
 var DEBUG = true;
-var PORT = 3000 || process.env.PORT;
+var PORT = process.env.PORT || 3000;
 var SOCKET_LIST = {};
 var PLAYER_LIST = {};
 var NEW_PLAYER_LIST = new Set();
