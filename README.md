@@ -1,3 +1,2 @@
 # MiniDota
-Later
-I like bears
+Map editor
