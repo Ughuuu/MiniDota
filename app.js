@@ -183,15 +183,54 @@ function spawnCreeps(game, faction) {
         game.addCreep(Creep("creep_dire", "35", "36", i * 3), faction);
         game.addCreep(Creep("creep_radiant", "35", "36", i * 3), faction);
     }
-    game.addCreep(Creep("abaddon", "36", "36", 0), faction);
 }
 
 function testCreeps(game) {
-    spawnRosh(game);
+    game.addCreep(Creep("viper", "386", "386", 0), "dire");
+    game.addCreep(Creep("tiny", "460", "460", 0), "dire");
+    game.addCreep(Creep("pudge", "474", "474", 0), "dire");
+    game.addCreep(Creep("axe", "203", "203", 0), "dire");
+    game.addCreep(Creep("alchemist", "206", "206", 0), "dire");
+
+    game.addCreep(Creep("abaddon", "406", "406", 0), "radiant");
+    game.addCreep(Creep("templar_assassin", "434", "434", 0), "radiant");
+    game.addCreep(Creep("zeus", "338", "338", 0), "radiant");
+    game.addCreep(Creep("jakiro", "339", "339", 0), "radiant");
+    game.addCreep(Creep("ursa", "305", "305", 0), "radiant");
+
+    makeTowers(game);
     spawnCreeps(game, "radiant");
+    spawnRosh(game);
+    game.addCreep(Creep("observer", "300", "300", 0), "radiant");
+    game.addCreep(Creep("observer", "291", "291", 0), "radiant");
+    game.addCreep(Creep("observer", "318", "318", 0), "radiant");
+    game.addCreep(Creep("sentry", "444", "444", 0), "radiant");
     for (var i in MAP) {
         //game.addCreep(Creep("creep_radiant", i, i, 0), "radiant");
     }
+}
+
+function makeTowers(game){    
+    game.addCreep(Creep("tower_radiant", "418", "418", 0), "radiant");
+    game.addCreep(Creep("tower_radiant", "85", "85", 0), "radiant");
+    game.addCreep(Creep("tower_radiant", "275", "275", 0), "radiant");
+    game.addCreep(Creep("tower_radiant", "427", "427", 0), "radiant");
+    game.addCreep(Creep("tower_radiant", "86", "86", 0), "radiant");
+    game.addCreep(Creep("tower_radiant", "164", "164", 0), "radiant");
+    game.addCreep(Creep("tower_radiant", "78", "78", 0), "radiant");
+    game.addCreep(Creep("tower_radiant", "334", "334", 0), "radiant");
+    game.addCreep(Creep("tower_radiant", "398", "398", 0), "radiant");
+
+
+    game.addCreep(Creep("tower_dire", "207", "207", 0), "dire");
+    game.addCreep(Creep("tower_dire", "452", "452", 0), "dire");
+    game.addCreep(Creep("tower_dire", "224", "224", 0), "dire");
+    game.addCreep(Creep("tower_dire", "151", "151", 0), "dire");
+    game.addCreep(Creep("tower_dire", "473", "473", 0), "dire");
+    game.addCreep(Creep("tower_dire", "144", "144", 0), "dire");
+    game.addCreep(Creep("tower_dire", "118", "118", 0), "dire");
+    game.addCreep(Creep("tower_dire", "383", "383", 0), "dire");
+    game.addCreep(Creep("tower_dire", "362", "362", 0), "dire");
 }
 
 function makeGame(id1, id2) {
@@ -205,7 +244,9 @@ function makeGame(id1, id2) {
     
     spawnCreeps(GAME_LIST[id1 + "" + id2], "radiant");
     
-    testCreeps(GAME_LIST[id1 + "" + id2]);
+    makeTowers(GAME_LIST[id1 + "" + id2]);
+
+    //testCreeps(GAME_LIST[id1 + "" + id2]);
 }
 
 function gameOver(id1, id2, winner) {

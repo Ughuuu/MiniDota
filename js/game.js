@@ -87,7 +87,7 @@ app.controller('InGame', ['$scope', '$mdToast', function ($scope, $mdToast) {
                 if (SHADOW_ON) {
                     var shadow = new PIXI.Sprite(heroes["creep_dire"]);
                     shadow.anchor.x = 0.5;
-                    shadow.anchor.y = 0.5;
+                    shadow.anchor.y = 1;
 
                     shadow.tint = 0x000000;
                     SHADOWS.push(shadow);
@@ -215,17 +215,26 @@ app.controller('InGame', ['$scope', '$mdToast', function ($scope, $mdToast) {
                 n = PLAYERS.length;
             }
             for (var i = 0; i < n; i++) {
+                data[i].y+=heroes[data[i].name].height/2 - 20;
                 PLAYERS[i].id = data[i].id;
                 PLAYERS[i].texture = heroes[data[i].name];
                 PLAYERS[i].position.x = data[i].x * scale + START_X;
                 PLAYERS[i].position.y = -data[i].y * scale + START_Y;
                 PLAYERS[i].rotation = data[i].ang;
-                var playerScale = 0.5 - (3 - data[i].h) / 12;
+                var playerScale = 0.5 - (3 - data[i].h) / 16;
                 if (data[i].name == "creep_radiant") {
                     //playerScale = 0.2;
                 }
                 if (data[i].name == "roshan") {
                     playerScale = 0.4;
+                }
+                if (data[i].name.indexOf("tower") != -1 
+                    || data[i].name.indexOf("creep") != -1
+                    || data[i].name.indexOf("roshan") != -1
+                    || data[i].name.indexOf("observer") != -1
+                    || data[i].name.indexOf("sentry") != -1) {
+                    PLAYERS[i].interactive = false;
+                    //data[i].y-=50;
                 }
                 PLAYERS[i].scale.x = PLAYERS[i].scale.y = playerScale;
 
@@ -242,8 +251,8 @@ app.controller('InGame', ['$scope', '$mdToast', function ($scope, $mdToast) {
                     y /= len;
                     SHADOWS[i].alpha = (1000 - len) / 1000;
                     SHADOWS[i].texture = heroes[data[i].name];
-                    SHADOWS[i].position.x = (data[i].x + x * 10) * scale + START_X;
-                    SHADOWS[i].position.y = -(data[i].y + y * 10) * scale + START_Y;
+                    SHADOWS[i].position.x = (data[i].x) * scale + START_X;
+                    SHADOWS[i].position.y = -(data[i].y) * scale + START_Y;
                     SHADOWS[i].rotation = ang;
                 }
             }
