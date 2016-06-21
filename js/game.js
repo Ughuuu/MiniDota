@@ -14,7 +14,7 @@ app.controller('InGame', ['$scope', '$mdToast', function ($scope, $mdToast) {
         var PLAYERS = [];
         var SHADOWS = [];
         var NAMES = [];
-        var SHADOW_ON = false;
+        var SHADOW_ON = true;
         var res;
         var scale = 1;
         var chat_size = 100;
@@ -80,9 +80,6 @@ app.controller('InGame', ['$scope', '$mdToast', function ($scope, $mdToast) {
                 player.anchor.x = 0.5;
                 player.anchor.y = 0.5;
                 
-                player.scale.x = 0.4;
-                player.scale.y = 0.4;
-                
                 PLAYERS.push(player);
 
                 NAMES.push(text);
@@ -91,12 +88,8 @@ app.controller('InGame', ['$scope', '$mdToast', function ($scope, $mdToast) {
                     var shadow = new PIXI.Sprite(heroes["creep_dire"]);
                     shadow.anchor.x = 0.5;
                     shadow.anchor.y = 0.5;
-                    
-                    shadow.scale.x = 0.3;
-                    shadow.scale.y = 0.3;
-                    shadow.rotation = 1;
+
                     shadow.tint = 0x000000;
-                    shadow.alpha = 0.4;
                     SHADOWS.push(shadow);
                 }
             }
@@ -213,6 +206,7 @@ app.controller('InGame', ['$scope', '$mdToast', function ($scope, $mdToast) {
                 ATAN2[x2 + "," + y2] = Math.atan2(x, y);
             }
             return ATAN2[x2 + "," + y2];
+            return Math.atan2(x, y);
         }
         socket.on('game event', function (data) {
             $scope.play_text = "On";
@@ -226,9 +220,12 @@ app.controller('InGame', ['$scope', '$mdToast', function ($scope, $mdToast) {
                 PLAYERS[i].position.x = data[i].x * scale + START_X;
                 PLAYERS[i].position.y = -data[i].y * scale + START_Y;
                 PLAYERS[i].rotation = data[i].ang;
-                var playerScale = 0.6 - (3 - data[i].h) / 10;
+                var playerScale = 0.5 - (3 - data[i].h) / 12;
                 if (data[i].name == "creep_radiant") {
-                    playerScale = 0.2;
+                    //playerScale = 0.2;
+                }
+                if (data[i].name == "roshan") {
+                    playerScale = 0.4;
                 }
                 PLAYERS[i].scale.x = PLAYERS[i].scale.y = playerScale;
 
@@ -238,15 +235,15 @@ app.controller('InGame', ['$scope', '$mdToast', function ($scope, $mdToast) {
                 
                 if (SHADOW_ON) {
                     SHADOWS[i].scale.x = SHADOWS[i].scale.y = playerScale;
-                    var x = data[i].x - 750, y = data[i].y - 330;
+                    var x = data[i].x - 753, y = data[i].y - 310;
                     var len = Math.sqrt(x * x + y * y);
                     var ang = getAtan2(x, y);
                     x /= len;
                     y /= len;
-                    SHADOWS[i].alpha = (800 - len) / 800;
+                    SHADOWS[i].alpha = (1000 - len) / 1000;
                     SHADOWS[i].texture = heroes[data[i].name];
-                    SHADOWS[i].position.x = (data[i].x + x * 25) * scale + START_X;
-                    SHADOWS[i].position.y = -(data[i].y + y * 35) * scale + START_Y;
+                    SHADOWS[i].position.x = (data[i].x + x * 10) * scale + START_X;
+                    SHADOWS[i].position.y = -(data[i].y + y * 10) * scale + START_Y;
                     SHADOWS[i].rotation = ang;
                 }
             }
